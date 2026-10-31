@@ -1,130 +1,150 @@
 {
-  "updated": "2026-10-31",
-  "source": "Known formats use a fixed YouTube search. A new format is a word that shows up in two or more different videos from a wide 'ai shorts' search and is not already on the list. A format that never says its name in the title still will not show up.",
+  "updated": "2026-11-01",
+  "source": "Built from a YouTube search for recent shorts, ai shorts, and reels. No format name is typed in. A card is a two-word phrase that showed up on more than one video. A phrase that is not in the title still will not be grouped.",
   "formats": [
     {
-      "id": "ai-baby",
+      "id": "video-1",
       "rank": "#1",
-      "title": "AI baby comedy skit",
-      "query": "ai baby comedy shorts",
-      "signal_views": 1590792,
-      "signal_title": "Baby Gaya Nani Ke Ghar Bina Bataye 😱👵 | Mummy Ko Pata Chala To Kya Hua? 😂 | Funny Baby Story",
+      "title": "I Spent 24 HOURS With The World’s SHORTEST Woman 👩🏼",
+      "kind": "video",
+      "signal_views": 1131406,
+      "signal_title": "I Spent 24 HOURS With The World’s SHORTEST Woman 👩🏼",
+      "examples": [
+        "I Spent 24 HOURS With The World’s SHORTEST Woman 👩🏼"
+      ],
+      "videos": 1,
       "free": true,
-      "lasts": "One random baby dies in about a week. The same face, same voice, and same set can keep going.",
-      "what": "A generic baby, an adult voice, one place, and a 30-second joke. Setup, complaint, punchline. This search returned several videos over 800,000 views on 31 Oct 2026, ahead of the other formats below.",
-      "make": [
-        "Save one baby face. Do not use a real child's photo.",
-        "Keep one set, such as a shop counter or a house door, in every episode.",
-        "Write four lines: a request, a pause, a complaint, a last line.",
-        "Record your own voice. Do not clone a real person's voice.",
-        "Turn the still into a talking clip, then put big captions on every line.",
-        "Turn on Instagram's AI label. Post the next four episodes with the same baby."
-      ],
-      "tools": "A still generator, your own voice, and a talking-photo tool. CapCut for captions.",
-      "avoid": "A real child's face, a copied voice, or another channel's exact story."
+      "lasts": "One video. It has not repeated often enough to call it a format.",
+      "what": "Highest videos from this scan that did not share a phrase with another video.",
+      "make": [],
+      "tools": "",
+      "avoid": ""
     },
     {
-      "id": "dance-swap",
+      "id": "video-2",
       "rank": "#2",
-      "title": "Character dance swap",
-      "query": "ai character dance shorts",
-      "signal_views": 42730,
-      "signal_title": "AI से किसी भी Dance Video का Style Copy करो — बिल्कुल FREE!",
-      "free": false,
-      "lasts": "A dance sound peaks in a few days. A character people recognize can outlast the sound.",
-      "what": "A still photo is placed onto a dance clip. The body moves, the face stays the character. On 31 Oct 2026 the top public result for this search was about 208,000 views, well below AI baby comedy.",
-      "make": [
-        "Pick a dance clip you can use, 8 to 15 seconds, one person in frame.",
-        "Use a character you made. Do not use a living person's photo.",
-        "Upload the still and the dance into a motion tool and export 9:16.",
-        "Keep the same character next time. A new face every video does not become a channel.",
-        "Label the video as AI."
+      "title": "Wife Drank It All! 😂 Tamil Couple Comedy #shorts",
+      "kind": "video",
+      "signal_views": 1083736,
+      "signal_title": "Wife Drank It All! 😂 Tamil Couple Comedy #shorts",
+      "examples": [
+        "Wife Drank It All! 😂 Tamil Couple Comedy #shorts"
       ],
-      "tools": "A motion tool such as Viggle or Kling, plus CapCut.",
-      "avoid": "A private person's face, or a celebrity's face, on the dance."
+      "videos": 1,
+      "free": true,
+      "lasts": "One video. It has not repeated often enough to call it a format.",
+      "what": "Highest videos from this scan that did not share a phrase with another video.",
+      "make": [],
+      "tools": "",
+      "avoid": ""
     },
     {
-      "id": "talking-girl",
+      "id": "video-3",
       "rank": "#3",
-      "title": "AI talking-character series",
-      "query": "ai girl talking shorts",
-      "signal_views": 155599,
-      "signal_title": "AI भाभी Romantic Video 💕 | Love Story Short | Cute Couple Moments 2025\"",
-      "free": false,
-      "lasts": "A one-off pretty face fades. A character with the same look and a point of view can run for months.",
-      "what": "One young-woman character, same face every episode, short clever lines to camera. This is the format behind those channels. On 31 Oct 2026 the top public result in this search was about 155,000 views.",
-      "make": [
-        "Design one original face and save it. Do not copy a real creator.",
-        "Write a 20-second line with one turn at the end.",
-        "Record your own voice or a voice you have the rights to.",
-        "Lip-sync the still. Same clothes, same room, so the channel is recognizable.",
-        "Label it as AI."
+      "title": "Sarojini market me bas 50₹ ki dress.....😳|| #snappygirls #shorts",
+      "kind": "video",
+      "signal_views": 143376,
+      "signal_title": "Sarojini market me bas 50₹ ki dress.....😳|| #snappygirls #shorts",
+      "examples": [
+        "Sarojini market me bas 50₹ ki dress.....😳|| #snappygirls #shorts"
       ],
-      "tools": "Still generator, lip-sync, CapCut captions.",
-      "avoid": "Copying a real creator's face, name, or exact videos."
+      "videos": 1,
+      "free": true,
+      "lasts": "One video. It has not repeated often enough to call it a format.",
+      "what": "Highest videos from this scan that did not share a phrase with another video.",
+      "make": [],
+      "tools": "",
+      "avoid": ""
     },
     {
-      "id": "mythology",
+      "id": "video-4",
       "rank": "#4",
-      "title": "AI mythology clip",
-      "query": "ai mythology god shorts",
-      "signal_views": 102182,
-      "signal_title": "Ganesha vs Kartikeya — Race Around the World | Mythology Short Movie | Lord Ganesha Story",
-      "free": false,
-      "lasts": "A single myth clip can spike. A series with the same art style lasts longer than a new god every upload.",
-      "what": "A short retelling of a known story, told in vertical video with AI images. On 31 Oct 2026 a public story result sat around 102,000 views. Tutorials about making these videos are common, which means many people are entering.",
-      "make": [
-        "Pick one story you can tell in 30 seconds. One event, not the whole epic.",
-        "Open on the conflict in the first two seconds.",
-        "Use one art style for the whole series.",
-        "Captions on every line. A calm voiceover, not a song on top of the words.",
-        "Label it as AI."
+      "title": "सब्जियों का मजेदार इलाज | डॉक्टर बैंगन की कॉमेडी| 🙀 #live #shortfeed #shorts #viral #livestream",
+      "kind": "video",
+      "signal_views": 114021,
+      "signal_title": "सब्जियों का मजेदार इलाज | डॉक्टर बैंगन की कॉमेडी| 🙀 #live #shortfeed #shorts #viral #livestream",
+      "examples": [
+        "सब्जियों का मजेदार इलाज | डॉक्टर बैंगन की कॉमेडी| 🙀 #live #shortfeed #shorts #viral #livestream"
       ],
-      "tools": "Still or video generator, your voice, CapCut.",
-      "avoid": "Stuffing five scenes into 15 seconds. The viewer never reaches the ending."
+      "videos": 1,
+      "free": true,
+      "lasts": "One video. It has not repeated often enough to call it a format.",
+      "what": "Highest videos from this scan that did not share a phrase with another video.",
+      "make": [],
+      "tools": "",
+      "avoid": ""
     },
     {
-      "id": "horror",
+      "id": "video-5",
       "rank": "#5",
-      "title": "AI horror episode",
-      "query": "ai horror story shorts",
-      "signal_views": 1718783,
-      "signal_title": "Haunted Ship - Bhoot Ki Kahani | A.I. Horror Story - Horror Story in Hindi | KM E200🔥🔥🔥",
-      "free": false,
-      "lasts": "Episode series last longer than one jump-scare. Number the episodes.",
-      "what": "A narrator, a dark still, and a story that ends on a turn. On 31 Oct 2026 this search mostly returned tutorials, the largest about 662,000 views. That is demand from people who want to make them, not a clean count of horror episodes. Treat this rank as softer than the baby skits.",
-      "make": [
-        "Episode number on screen from the first second.",
-        "Write 80 words. A normal start, one wrong detail, a last line that reframes it.",
-        "One narrator voice for the whole series.",
-        "Three stills only. Cut on the sentences, not on a beat drop.",
-        "End on the turn. Do not explain it.",
-        "Label it as AI."
-      ],
-      "tools": "Still generator, your voice, CapCut.",
-      "avoid": "Real people's faces, gore close-ups, and a new narrator every episode."
-    }
-  ],
-  "emerging": [
-    {
-      "phrase": "cartoon",
-      "videos": 3,
-      "views": 1441415,
+      "title": "Ronaldo vs Messi: The Football Challenge of the Night Friend LIVE #shorts #football",
+      "kind": "video",
+      "signal_views": 99597,
+      "signal_title": "Ronaldo vs Messi: The Football Challenge of the Night Friend LIVE #shorts #football",
       "examples": [
-        "ai se cartoon video kaise banaye",
-        "How to Make AI Cartoon Shorts",
-        "How to Make Cartoon Videos with AI"
-      ]
+        "Ronaldo vs Messi: The Football Challenge of the Night Friend LIVE #shorts #football"
+      ],
+      "videos": 1,
+      "free": true,
+      "lasts": "One video. It has not repeated often enough to call it a format.",
+      "what": "Highest videos from this scan that did not share a phrase with another video.",
+      "make": [],
+      "tools": "",
+      "avoid": ""
     },
     {
-      "phrase": "stickman",
-      "videos": 3,
-      "views": 308503,
+      "id": "video-6",
+      "rank": "#6",
+      "title": "SHORT FILM/ WALAALAHAA MARKEE FULAY YIHIIN..?😂",
+      "kind": "video",
+      "signal_views": 84455,
+      "signal_title": "SHORT FILM/ WALAALAHAA MARKEE FULAY YIHIIN..?😂",
       "examples": [
-        "Viral Survival Stickman Videos Using AI",
-        "Full Stickman Animations on Autopilot",
-        "Create Stickman Animation with AI"
-      ]
+        "SHORT FILM/ WALAALAHAA MARKEE FULAY YIHIIN..?😂"
+      ],
+      "videos": 1,
+      "free": true,
+      "lasts": "One video. It has not repeated often enough to call it a format.",
+      "what": "Highest videos from this scan that did not share a phrase with another video.",
+      "make": [],
+      "tools": "",
+      "avoid": ""
+    },
+    {
+      "id": "video-7",
+      "rank": "#7",
+      "title": "పెళ్లాన్ని గజగజ వణికించాలె...😂SADANNA COMEDY VILLAGE COMEDY SHORT FILM | RS NANDA LATEST 2026",
+      "kind": "video",
+      "signal_views": 81933,
+      "signal_title": "పెళ్లాన్ని గజగజ వణికించాలె...😂SADANNA COMEDY VILLAGE COMEDY SHORT FILM | RS NANDA LATEST 2026",
+      "examples": [
+        "పెళ్లాన్ని గజగజ వణికించాలె...😂SADANNA COMEDY VILLAGE COMEDY SHORT FILM | RS NANDA LATEST 2026"
+      ],
+      "videos": 1,
+      "free": true,
+      "lasts": "One video. It has not repeated often enough to call it a format.",
+      "what": "Highest videos from this scan that did not share a phrase with another video.",
+      "make": [],
+      "tools": "",
+      "avoid": ""
+    },
+    {
+      "id": "video-8",
+      "rank": "#8",
+      "title": "BOUNTY HUNTERS | Sci-Fi Western Short Film (2026)",
+      "kind": "video",
+      "signal_views": 70029,
+      "signal_title": "BOUNTY HUNTERS | Sci-Fi Western Short Film (2026)",
+      "examples": [
+        "BOUNTY HUNTERS | Sci-Fi Western Short Film (2026)"
+      ],
+      "videos": 1,
+      "free": true,
+      "lasts": "One video. It has not repeated often enough to call it a format.",
+      "what": "Highest videos from this scan that did not share a phrase with another video.",
+      "make": [],
+      "tools": "",
+      "avoid": ""
     }
   ]
 }

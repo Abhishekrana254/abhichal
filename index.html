@@ -9,25 +9,22 @@
   <link rel="icon" href="icons/icon-192.png" />
   <link rel="apple-touch-icon" href="icons/icon-512.png" />
   <title>Formatly</title>
-  <link rel="stylesheet" href="style.css?v=5" />
+  <link rel="stylesheet" href="style.css?v=6" />
 </head>
 <body>
   <div class="kicker">Updated <span id="updated">31 Oct 2026</span></div>
   <h1>Formatly</h1>
-  <p class="sub">Which kind of video is getting views, and the steps to make it. A sound chart does not tell you this.</p>
+  <p class="sub">What is showing up on recent shorts. The names below come from the videos, not from a list someone typed.</p>
   <section class="card gap">
-    <h2>What this is</h2>
+    <h2>How the list is made</h2>
     <ol>
-      <li>Hashtag and sound apps list audio. Creators put generic tags on AI videos, so those apps miss the format.</li>
-      <li>Formatly groups the videos: AI baby skit, dance swap, talking character, mythology, horror episode.</li>
-      <li>The number on each card is the top public YouTube result for that search. Instagram does not publish this count.</li>
+      <li>Search recent YouTube shorts, without typing baby, horror, dance, or any other format.</li>
+      <li>Drop tutorials.</li>
+      <li>Keep a two-word phrase only when it shows up on more than one video.</li>
     </ol>
-    <p>The #1 recipe is open. The other four are ₹149, once. No weekly charge.</p>
+    <p>Next week the phrases can be different. A recipe is added only when the phrase matches one we already know how to shoot.</p>
   </section>
   <div id="list"></div>
-  <h2>Not on the list yet</h2>
-  <p class="meta">Words that repeated in a wide search and are not one of the five formats above. No recipe until a word sticks.</p>
-  <div id="emerging"></div>
   <section class="hisab" id="hisab">
     <h2>Ledger</h2>
     <p class="meta">Each day, type ad spend, visits, and how many people paid ₹149. Scale only if this stays at 100% or more.</p>
@@ -44,8 +41,8 @@
       <button id="buy" class="buy" type="button">Other 4 recipes ₹149</button>
     </div>
   </div>
-  <script src="pay-config.js?v=5"></script>
-  <script src="app.js?v=5"></script>
+  <script src="pay-config.js?v=6"></script>
+  <script src="app.js?v=6"></script>
   <script>
     if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
   </script>

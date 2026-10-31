@@ -1,0 +1,60 @@
+[
+  {
+    "id": "baby",
+    "words": ["baby", "babies"],
+    "lasts": "One random baby dies in about a week. The same face, voice, and set can keep going.",
+    "make": [
+      "Save one baby face. Do not use a real child's photo.",
+      "Keep one set in every episode.",
+      "Write four lines: a request, a pause, a complaint, a last line.",
+      "Record your own voice. Do not clone a real person's voice.",
+      "Turn the still into a talking clip and caption every line.",
+      "Turn on the AI label. Post the next episodes with the same baby."
+    ],
+    "tools": "A still generator, your own voice, and a talking-photo tool.",
+    "avoid": "A real child's face, a copied voice, or another channel's exact story."
+  },
+  {
+    "id": "dance",
+    "words": ["dance", "dancing"],
+    "lasts": "A dance sound peaks in a few days. The same character can outlast the sound.",
+    "make": [
+      "Use a dance clip you have the rights to, 8 to 15 seconds, one person in frame.",
+      "Use a character you made. Do not use a living person's photo.",
+      "Put the still onto the dance with a motion tool and export vertical.",
+      "Keep the same character next time.",
+      "Label the video as AI."
+    ],
+    "tools": "A motion tool such as Viggle or Kling, plus CapCut.",
+    "avoid": "A private person's face, or a celebrity's face, on the dance."
+  },
+  {
+    "id": "horror",
+    "words": ["horror", "bhoot", "haunted"],
+    "lasts": "Number the episodes. One jump-scare dies faster than a series.",
+    "make": [
+      "Put the episode number on screen from the first second.",
+      "Write about 80 words. A normal start, one wrong detail, a last line that reframes it.",
+      "Keep one narrator voice for the series.",
+      "Use three stills. Cut on the sentences.",
+      "End on the turn. Do not explain it.",
+      "Label it as AI."
+    ],
+    "tools": "A still generator, your voice, CapCut.",
+    "avoid": "Real people's faces, gore close-ups, and a new narrator every episode."
+  },
+  {
+    "id": "mythology",
+    "words": ["ganesha", "mythology", "kartikeya", "myth"],
+    "lasts": "One myth clip can spike. The same art style lasts longer than a new god every upload.",
+    "make": [
+      "Tell one event in 30 seconds, not the whole story.",
+      "Open on the conflict in the first two seconds.",
+      "Use one art style for the series.",
+      "Caption every line. Keep the voiceover clear of music.",
+      "Label it as AI."
+    ],
+    "tools": "A still or video generator, your voice, CapCut.",
+    "avoid": "Stuffing five scenes into 15 seconds."
+  }
+]

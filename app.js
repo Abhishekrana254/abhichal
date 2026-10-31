@@ -14,9 +14,12 @@ function card(t) {
   const open = t.free || paid();
   const head = `<span class="tag">${esc(t.rank)}</span> <span class="tag dim">${views(t.signal_views)} views</span>`;
   const body = `<h2>${esc(t.title)}</h2>
-    <p class="meta">Top public result: ${esc(t.signal_title)}</p>
+    <p class="meta">${t.videos > 1 ? t.videos + " videos" : "One video"} · ${esc(t.signal_title)}</p>
     <p>${esc(t.what)}</p>
-    <p class="meta">${esc(t.lasts)}</p>`;
+    <p class="meta">${esc(t.lasts || "")}</p>`;
+  if (!t.make || !t.make.length) {
+    return `<article class="card">${head}${body}<p class="meta">No recipe yet. The phrase is on the list because the search found it.</p></article>`;
+  }
   if (!open) {
     return `<article class="locked">${head}${body}<p>Recipe is in the ₹149 pack.</p></article>`;
   }
@@ -32,12 +35,10 @@ function render(doc) {
   document.getElementById("updated").textContent = doc.updated;
   document.getElementById("source").textContent = doc.source;
   document.getElementById("list").innerHTML = doc.formats.map(card).join("");
-  const emerging = doc.emerging || [];
-  document.getElementById("emerging").innerHTML = emerging.length
-    ? emerging.map((row) => `<article class="locked"><span class="tag dim">${views(row.views)} views · ${row.videos} videos</span><h2>${esc(row.phrase)}</h2><p class="meta">${row.examples.map(esc).join("<br>")}</p></article>`).join("")
-    : "<p class=\"meta\">Nothing new repeated enough in this scan.</p>";
   const buy = document.getElementById("buy");
+  const locked = doc.formats.some((t) => t.make && t.make.length && !t.free && !paid());
   if (paid()) buy.textContent = "Pack is open";
+  else if (!locked) buy.textContent = "No extra recipe in this scan";
 }
 
 function unlock() {
@@ -101,7 +102,7 @@ document.getElementById("save").onclick = () => {
   paintLog();
 };
 
-fetch("./data/formats.json?v=5")
+fetch("./data/formats.json?v=6")
   .then((r) => r.json())
   .then((doc) => {
     window.FORMATS = doc;
