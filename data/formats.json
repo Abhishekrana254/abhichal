@@ -1,75 +1,79 @@
 {
   "updated": "2026-11-01",
-  "source": "Built from a YouTube search for recent shorts, ai shorts, and reels. No format name is typed in. A card is a two-word phrase that showed up on more than one video. A phrase that is not in the title still will not be grouped.",
+  "source": "Built from a YouTube search for recent ai shorts, reels, and funny shorts. No format name is typed in. A card is a two-word phrase that showed up on more than one video. A phrase that is not in the title still will not be grouped.",
   "formats": [
     {
-      "id": "video-1",
+      "id": "comedy-amazing",
       "rank": "#1",
-      "title": "I Spent 24 HOURS With The World’s SHORTEST Woman 👩🏼",
-      "kind": "video",
-      "signal_views": 1131406,
-      "signal_title": "I Spent 24 HOURS With The World’s SHORTEST Woman 👩🏼",
+      "title": "comedy amazing",
+      "kind": "repeated",
+      "signal_views": 22107,
+      "signal_title": "Funniest Fun Top New Comedy Video 2027🤣Amazing best of funny video #humor #fypシ #pov #fyp #foryou 😍😜",
       "examples": [
-        "I Spent 24 HOURS With The World’s SHORTEST Woman 👩🏼"
+        "Funniest Fun Top New Comedy Video 2027🤣Amazing best of funny video #humor #fypシ #pov #fyp #foryou 😍😜",
+        "Top New Comedy Video Amazing Funny Video 😂Try To Not Laugh Funny Video Ep 113 By Geetpixel Adda"
       ],
-      "videos": 1,
+      "videos": 2,
       "free": true,
-      "lasts": "One video. It has not repeated often enough to call it a format.",
-      "what": "Highest videos from this scan that did not share a phrase with another video.",
+      "lasts": "It stays while these words keep showing up on different videos. Next scan can drop it.",
+      "what": "These two words showed up together on 2 different videos in this scan. Combined views 22,107.",
       "make": [],
       "tools": "",
       "avoid": ""
     },
     {
-      "id": "video-2",
+      "id": "amazing-funny",
       "rank": "#2",
-      "title": "Wife Drank It All! 😂 Tamil Couple Comedy #shorts",
-      "kind": "video",
-      "signal_views": 1083736,
-      "signal_title": "Wife Drank It All! 😂 Tamil Couple Comedy #shorts",
+      "title": "amazing funny",
+      "kind": "repeated",
+      "signal_views": 22107,
+      "signal_title": "Funniest Fun Top New Comedy Video 2027🤣Amazing best of funny video #humor #fypシ #pov #fyp #foryou 😍😜",
       "examples": [
-        "Wife Drank It All! 😂 Tamil Couple Comedy #shorts"
+        "Funniest Fun Top New Comedy Video 2027🤣Amazing best of funny video #humor #fypシ #pov #fyp #foryou 😍😜",
+        "Top New Comedy Video Amazing Funny Video 😂Try To Not Laugh Funny Video Ep 113 By Geetpixel Adda"
       ],
-      "videos": 1,
+      "videos": 2,
       "free": true,
-      "lasts": "One video. It has not repeated often enough to call it a format.",
-      "what": "Highest videos from this scan that did not share a phrase with another video.",
+      "lasts": "It stays while these words keep showing up on different videos. Next scan can drop it.",
+      "what": "These two words showed up together on 2 different videos in this scan. Combined views 22,107.",
       "make": [],
       "tools": "",
       "avoid": ""
     },
     {
-      "id": "video-3",
+      "id": "funny-comedy",
       "rank": "#3",
-      "title": "Sarojini market me bas 50₹ ki dress.....😳|| #snappygirls #shorts",
-      "kind": "video",
-      "signal_views": 143376,
-      "signal_title": "Sarojini market me bas 50₹ ki dress.....😳|| #snappygirls #shorts",
+      "title": "funny comedy",
+      "kind": "repeated",
+      "signal_views": 17542,
+      "signal_title": "Special Trending Funny Comedy Video 2026 😂Amazing Funny Video Episode 430 By Sohel Sheikh",
       "examples": [
-        "Sarojini market me bas 50₹ ki dress.....😳|| #snappygirls #shorts"
+        "Special Trending Funny Comedy Video 2026 😂Amazing Funny Video Episode 430 By Sohel Sheikh",
+        "🤣 Top 20 best videos of OctoberVideo Funny. #shorts #funny #comedy #pets #shortsvideo  #cat #dog"
       ],
-      "videos": 1,
+      "videos": 2,
       "free": true,
-      "lasts": "One video. It has not repeated often enough to call it a format.",
-      "what": "Highest videos from this scan that did not share a phrase with another video.",
+      "lasts": "It stays while these words keep showing up on different videos. Next scan can drop it.",
+      "what": "These two words showed up together on 2 different videos in this scan. Combined views 17,542.",
       "make": [],
       "tools": "",
       "avoid": ""
     },
     {
-      "id": "video-4",
+      "id": "try-laugh",
       "rank": "#4",
-      "title": "सब्जियों का मजेदार इलाज | डॉक्टर बैंगन की कॉमेडी| 🙀 #live #shortfeed #shorts #viral #livestream",
-      "kind": "video",
-      "signal_views": 114021,
-      "signal_title": "सब्जियों का मजेदार इलाज | डॉक्टर बैंगन की कॉमेडी| 🙀 #live #shortfeed #shorts #viral #livestream",
+      "title": "try laugh",
+      "kind": "repeated",
+      "signal_views": 17183,
+      "signal_title": "The Funniest Sahur Memes 🤣| Try Not To Laugh 🔥#freefire #funny #video #shorts",
       "examples": [
-        "सब्जियों का मजेदार इलाज | डॉक्टर बैंगन की कॉमेडी| 🙀 #live #shortfeed #shorts #viral #livestream"
+        "The Funniest Sahur Memes 🤣| Try Not To Laugh 🔥#freefire #funny #video #shorts",
+        "Top New Comedy Video Amazing Funny Video 😂Try To Not Laugh Funny Video Ep 113 By Geetpixel Adda"
       ],
-      "videos": 1,
+      "videos": 2,
       "free": true,
-      "lasts": "One video. It has not repeated often enough to call it a format.",
-      "what": "Highest videos from this scan that did not share a phrase with another video.",
+      "lasts": "It stays while these words keep showing up on different videos. Next scan can drop it.",
+      "what": "These two words showed up together on 2 different videos in this scan. Combined views 17,183.",
       "make": [],
       "tools": "",
       "avoid": ""
@@ -77,12 +81,12 @@
     {
       "id": "video-5",
       "rank": "#5",
-      "title": "Ronaldo vs Messi: The Football Challenge of the Night Friend LIVE #shorts #football",
+      "title": "2 Ziddi Pregnant Bow Horror New Special Trending Funny Comedy Video 2026 😂 Ep 186 By Extra Fun Masti",
       "kind": "video",
-      "signal_views": 99597,
-      "signal_title": "Ronaldo vs Messi: The Football Challenge of the Night Friend LIVE #shorts #football",
+      "signal_views": 77701,
+      "signal_title": "2 Ziddi Pregnant Bow Horror New Special Trending Funny Comedy Video 2026 😂 Ep 186 By Extra Fun Masti",
       "examples": [
-        "Ronaldo vs Messi: The Football Challenge of the Night Friend LIVE #shorts #football"
+        "2 Ziddi Pregnant Bow Horror New Special Trending Funny Comedy Video 2026 😂 Ep 186 By Extra Fun Masti"
       ],
       "videos": 1,
       "free": true,
@@ -95,12 +99,12 @@
     {
       "id": "video-6",
       "rank": "#6",
-      "title": "SHORT FILM/ WALAALAHAA MARKEE FULAY YIHIIN..?😂",
+      "title": "Forget Google Flow! 😱 This FREE AI Tool Makes Unlimited Long Videos | image to video ai free 🔥",
       "kind": "video",
-      "signal_views": 84455,
-      "signal_title": "SHORT FILM/ WALAALAHAA MARKEE FULAY YIHIIN..?😂",
+      "signal_views": 39017,
+      "signal_title": "Forget Google Flow! 😱 This FREE AI Tool Makes Unlimited Long Videos | image to video ai free 🔥",
       "examples": [
-        "SHORT FILM/ WALAALAHAA MARKEE FULAY YIHIIN..?😂"
+        "Forget Google Flow! 😱 This FREE AI Tool Makes Unlimited Long Videos | image to video ai free 🔥"
       ],
       "videos": 1,
       "free": true,
@@ -113,12 +117,12 @@
     {
       "id": "video-7",
       "rank": "#7",
-      "title": "పెళ్లాన్ని గజగజ వణికించాలె...😂SADANNA COMEDY VILLAGE COMEDY SHORT FILM | RS NANDA LATEST 2026",
+      "title": "Turn Long Videos Into VIRAL Shorts Automatically! 🤯 Klap AI Review 2026",
       "kind": "video",
-      "signal_views": 81933,
-      "signal_title": "పెళ్లాన్ని గజగజ వణికించాలె...😂SADANNA COMEDY VILLAGE COMEDY SHORT FILM | RS NANDA LATEST 2026",
+      "signal_views": 36872,
+      "signal_title": "Turn Long Videos Into VIRAL Shorts Automatically! 🤯 Klap AI Review 2026",
       "examples": [
-        "పెళ్లాన్ని గజగజ వణికించాలె...😂SADANNA COMEDY VILLAGE COMEDY SHORT FILM | RS NANDA LATEST 2026"
+        "Turn Long Videos Into VIRAL Shorts Automatically! 🤯 Klap AI Review 2026"
       ],
       "videos": 1,
       "free": true,
@@ -131,12 +135,12 @@
     {
       "id": "video-8",
       "rank": "#8",
-      "title": "BOUNTY HUNTERS | Sci-Fi Western Short Film (2026)",
+      "title": "Reem Series Episode 35 The Final #shorts #youtube_shorts #shorts #shortsfeed #viralshorts2 #explo...",
       "kind": "video",
-      "signal_views": 70029,
-      "signal_title": "BOUNTY HUNTERS | Sci-Fi Western Short Film (2026)",
+      "signal_views": 36250,
+      "signal_title": "Reem Series Episode 35 The Final #shorts #youtube_shorts #shorts #shortsfeed #viralshorts2 #explo...",
       "examples": [
-        "BOUNTY HUNTERS | Sci-Fi Western Short Film (2026)"
+        "Reem Series Episode 35 The Final #shorts #youtube_shorts #shorts #shortsfeed #viralshorts2 #explo..."
       ],
       "videos": 1,
       "free": true,

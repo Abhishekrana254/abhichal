@@ -10,7 +10,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data" / "formats.json"
 RECIPES = ROOT / "data" / "recipes.json"
-QUERIES = ["shorts", "ai shorts", "reels"]
+QUERIES = ["ai shorts", "reels", "funny shorts"]
 # YouTube "this month" style filter. The query itself names no format.
 SP = "CAMSBggCEAEYAw%3D%3D"
 STOP = {
@@ -170,7 +170,7 @@ def main():
     doc = {
         "updated": date.today().isoformat(),
         "source": (
-            "Built from a YouTube search for recent shorts, ai shorts, and reels. "
+            "Built from a YouTube search for recent ai shorts, reels, and funny shorts. "
             "No format name is typed in. A card is a two-word phrase that showed up on more than one video. "
             "A phrase that is not in the title still will not be grouped."
         ),
