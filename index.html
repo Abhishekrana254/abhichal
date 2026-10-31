@@ -9,7 +9,7 @@
   <link rel="icon" href="icons/icon-192.png" />
   <link rel="apple-touch-icon" href="icons/icon-512.png" />
   <title>Formatly</title>
-  <link rel="stylesheet" href="style.css?v=4" />
+  <link rel="stylesheet" href="style.css?v=5" />
 </head>
 <body>
   <div class="kicker">Updated <span id="updated">31 Oct 2026</span></div>
@@ -25,6 +25,9 @@
     <p>The #1 recipe is open. The other four are ₹149, once. No weekly charge.</p>
   </section>
   <div id="list"></div>
+  <h2>Not on the list yet</h2>
+  <p class="meta">Words that repeated in a wide search and are not one of the five formats above. No recipe until a word sticks.</p>
+  <div id="emerging"></div>
   <section class="hisab" id="hisab">
     <h2>Ledger</h2>
     <p class="meta">Each day, type ad spend, visits, and how many people paid ₹149. Scale only if this stays at 100% or more.</p>
@@ -41,8 +44,8 @@
       <button id="buy" class="buy" type="button">Other 4 recipes ₹149</button>
     </div>
   </div>
-  <script src="pay-config.js?v=4"></script>
-  <script src="app.js?v=4"></script>
+  <script src="pay-config.js?v=5"></script>
+  <script src="app.js?v=5"></script>
   <script>
     if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
   </script>

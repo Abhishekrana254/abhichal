@@ -32,6 +32,10 @@ function render(doc) {
   document.getElementById("updated").textContent = doc.updated;
   document.getElementById("source").textContent = doc.source;
   document.getElementById("list").innerHTML = doc.formats.map(card).join("");
+  const emerging = doc.emerging || [];
+  document.getElementById("emerging").innerHTML = emerging.length
+    ? emerging.map((row) => `<article class="locked"><span class="tag dim">${views(row.views)} views · ${row.videos} videos</span><h2>${esc(row.phrase)}</h2><p class="meta">${row.examples.map(esc).join("<br>")}</p></article>`).join("")
+    : "<p class=\"meta\">Nothing new repeated enough in this scan.</p>";
   const buy = document.getElementById("buy");
   if (paid()) buy.textContent = "Pack is open";
 }
@@ -97,7 +101,7 @@ document.getElementById("save").onclick = () => {
   paintLog();
 };
 
-fetch("./data/formats.json?v=4")
+fetch("./data/formats.json?v=5")
   .then((r) => r.json())
   .then((doc) => {
     window.FORMATS = doc;

@@ -1,14 +1,14 @@
 {
   "updated": "2026-10-31",
-  "source": "Public YouTube search on 31 Oct 2026. Instagram does not publish a format count, so this is the demand signal, not an Instagram view counter.",
+  "source": "Known formats use a fixed YouTube search. A new format is a word that shows up in two or more different videos from a wide 'ai shorts' search and is not already on the list. A format that never says its name in the title still will not show up.",
   "formats": [
     {
       "id": "ai-baby",
       "rank": "#1",
       "title": "AI baby comedy skit",
       "query": "ai baby comedy shorts",
-      "signal_views": 1590380,
-      "signal_title": "Baby Gaya Nani Ke Ghar Bina Bataye",
+      "signal_views": 1590792,
+      "signal_title": "Baby Gaya Nani Ke Ghar Bina Bataye 😱👵 | Mummy Ko Pata Chala To Kya Hua? 😂 | Funny Baby Story",
       "free": true,
       "lasts": "One random baby dies in about a week. The same face, same voice, and same set can keep going.",
       "what": "A generic baby, an adult voice, one place, and a 30-second joke. Setup, complaint, punchline. This search returned several videos over 800,000 views on 31 Oct 2026, ahead of the other formats below.",
@@ -28,8 +28,8 @@
       "rank": "#2",
       "title": "Character dance swap",
       "query": "ai character dance shorts",
-      "signal_views": 208018,
-      "signal_title": "Baby AI Dance Video Kaise Banaye",
+      "signal_views": 42730,
+      "signal_title": "AI से किसी भी Dance Video का Style Copy करो — बिल्कुल FREE!",
       "free": false,
       "lasts": "A dance sound peaks in a few days. A character people recognize can outlast the sound.",
       "what": "A still photo is placed onto a dance clip. The body moves, the face stays the character. On 31 Oct 2026 the top public result for this search was about 208,000 views, well below AI baby comedy.",
@@ -48,8 +48,8 @@
       "rank": "#3",
       "title": "AI talking-character series",
       "query": "ai girl talking shorts",
-      "signal_views": 155392,
-      "signal_title": "AI bhabhi romantic short",
+      "signal_views": 155599,
+      "signal_title": "AI भाभी Romantic Video 💕 | Love Story Short | Cute Couple Moments 2025\"",
       "free": false,
       "lasts": "A one-off pretty face fades. A character with the same look and a point of view can run for months.",
       "what": "One young-woman character, same face every episode, short clever lines to camera. This is the format behind those channels. On 31 Oct 2026 the top public result in this search was about 155,000 views.",
@@ -69,7 +69,7 @@
       "title": "AI mythology clip",
       "query": "ai mythology god shorts",
       "signal_views": 102182,
-      "signal_title": "Ganesha vs Kartikeya — Race Around the World",
+      "signal_title": "Ganesha vs Kartikeya — Race Around the World | Mythology Short Movie | Lord Ganesha Story",
       "free": false,
       "lasts": "A single myth clip can spike. A series with the same art style lasts longer than a new god every upload.",
       "what": "A short retelling of a known story, told in vertical video with AI images. On 31 Oct 2026 a public story result sat around 102,000 views. Tutorials about making these videos are common, which means many people are entering.",
@@ -88,8 +88,8 @@
       "rank": "#5",
       "title": "AI horror episode",
       "query": "ai horror story shorts",
-      "signal_views": 661913,
-      "signal_title": "Make Viral AI Horror Stories In Minutes (tutorial)",
+      "signal_views": 1718783,
+      "signal_title": "Haunted Ship - Bhoot Ki Kahani | A.I. Horror Story - Horror Story in Hindi | KM E200🔥🔥🔥",
       "free": false,
       "lasts": "Episode series last longer than one jump-scare. Number the episodes.",
       "what": "A narrator, a dark still, and a story that ends on a turn. On 31 Oct 2026 this search mostly returned tutorials, the largest about 662,000 views. That is demand from people who want to make them, not a clean count of horror episodes. Treat this rank as softer than the baby skits.",
@@ -103,6 +103,28 @@
       ],
       "tools": "Still generator, your voice, CapCut.",
       "avoid": "Real people's faces, gore close-ups, and a new narrator every episode."
+    }
+  ],
+  "emerging": [
+    {
+      "phrase": "cartoon",
+      "videos": 3,
+      "views": 1441415,
+      "examples": [
+        "ai se cartoon video kaise banaye",
+        "How to Make AI Cartoon Shorts",
+        "How to Make Cartoon Videos with AI"
+      ]
+    },
+    {
+      "phrase": "stickman",
+      "videos": 3,
+      "views": 308503,
+      "examples": [
+        "Viral Survival Stickman Videos Using AI",
+        "Full Stickman Animations on Autopilot",
+        "Create Stickman Animation with AI"
+      ]
     }
   ]
 }
