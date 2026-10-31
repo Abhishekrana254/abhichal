@@ -102,7 +102,7 @@ document.getElementById("save").onclick = () => {
   paintLog();
 };
 
-fetch("./data/formats.json?v=6")
+fetch("./data/formats.json?v=7")
   .then((r) => r.json())
   .then((doc) => {
     window.FORMATS = doc;

@@ -1,154 +1,138 @@
 {
   "updated": "2026-11-01",
-  "source": "Built from a YouTube search for recent ai shorts, reels, and funny shorts. No format name is typed in. A card is a two-word phrase that showed up on more than one video. A phrase that is not in the title still will not be grouped.",
+  "source": "YouTube's own suggestions for 'ai' plus each letter. No format name is typed in. Suggestions that are tutorials or tools are dropped, then the rest are ranked by the top video's views.",
   "formats": [
     {
-      "id": "comedy-amazing",
+      "id": "janani-kahani",
       "rank": "#1",
-      "title": "comedy amazing",
-      "kind": "repeated",
-      "signal_views": 22107,
-      "signal_title": "Funniest Fun Top New Comedy Video 2027🤣Amazing best of funny video #humor #fypシ #pov #fyp #foryou 😍😜",
+      "title": "ai janani ki kahani",
+      "kind": "suggestion",
+      "signal_views": 11165331,
+      "signal_title": "Janani AI Ke Kahani | New Show | Full Episode 01 | जननी एआई की कहानी | Dangal TV",
       "examples": [
-        "Funniest Fun Top New Comedy Video 2027🤣Amazing best of funny video #humor #fypシ #pov #fyp #foryou 😍😜",
-        "Top New Comedy Video Amazing Funny Video 😂Try To Not Laugh Funny Video Ep 113 By Geetpixel Adda"
+        "Janani AI Ke Kahani | New Show | Full Episode 01 | जननी एआई की कहानी | Dangal TV"
       ],
-      "videos": 2,
+      "videos": 1,
       "free": true,
-      "lasts": "It stays while these words keep showing up on different videos. Next scan can drop it.",
-      "what": "These two words showed up together on 2 different videos in this scan. Combined views 22,107.",
+      "lasts": "It stays while people keep searching this phrase. Next scan can drop it.",
+      "what": "YouTube suggested 'ai janani ki kahani' from the letters after 'ai'. Top public video has 11,165,331 views.",
       "make": [],
       "tools": "",
       "avoid": ""
     },
     {
-      "id": "amazing-funny",
+      "id": "real",
       "rank": "#2",
-      "title": "amazing funny",
-      "kind": "repeated",
-      "signal_views": 22107,
-      "signal_title": "Funniest Fun Top New Comedy Video 2027🤣Amazing best of funny video #humor #fypシ #pov #fyp #foryou 😍😜",
+      "title": "ai or real",
+      "kind": "suggestion",
+      "signal_views": 9314875,
+      "signal_title": "Is This REAL or AI? (IMPOSSIBLE)",
       "examples": [
-        "Funniest Fun Top New Comedy Video 2027🤣Amazing best of funny video #humor #fypシ #pov #fyp #foryou 😍😜",
-        "Top New Comedy Video Amazing Funny Video 😂Try To Not Laugh Funny Video Ep 113 By Geetpixel Adda"
+        "Is This REAL or AI? (IMPOSSIBLE)"
       ],
-      "videos": 2,
+      "videos": 1,
       "free": true,
-      "lasts": "It stays while these words keep showing up on different videos. Next scan can drop it.",
-      "what": "These two words showed up together on 2 different videos in this scan. Combined views 22,107.",
+      "lasts": "It stays while people keep searching this phrase. Next scan can drop it.",
+      "what": "YouTube suggested 'ai or real' from the letters after 'ai'. Top public video has 9,314,875 views.",
       "make": [],
       "tools": "",
       "avoid": ""
     },
     {
-      "id": "funny-comedy",
+      "id": "love-story",
       "rank": "#3",
-      "title": "funny comedy",
-      "kind": "repeated",
-      "signal_views": 17542,
-      "signal_title": "Special Trending Funny Comedy Video 2026 😂Amazing Funny Video Episode 430 By Sohel Sheikh",
+      "title": "ai love story",
+      "kind": "suggestion",
+      "signal_views": 8382034,
+      "signal_title": "Obsession — Love or Passion?❤️‍🔥 | An Untold Story | Emotional Love Story | AI Story",
       "examples": [
-        "Special Trending Funny Comedy Video 2026 😂Amazing Funny Video Episode 430 By Sohel Sheikh",
-        "🤣 Top 20 best videos of OctoberVideo Funny. #shorts #funny #comedy #pets #shortsvideo  #cat #dog"
+        "Obsession — Love or Passion?❤️‍🔥 | An Untold Story | Emotional Love Story | AI Story"
       ],
-      "videos": 2,
+      "videos": 1,
       "free": true,
-      "lasts": "It stays while these words keep showing up on different videos. Next scan can drop it.",
-      "what": "These two words showed up together on 2 different videos in this scan. Combined views 17,542.",
+      "lasts": "It stays while people keep searching this phrase. Next scan can drop it.",
+      "what": "YouTube suggested 'ai love story' from the letters after 'ai'. Top public video has 8,382,034 views.",
       "make": [],
       "tools": "",
       "avoid": ""
     },
     {
-      "id": "try-laugh",
+      "id": "kiss",
       "rank": "#4",
-      "title": "try laugh",
-      "kind": "repeated",
-      "signal_views": 17183,
-      "signal_title": "The Funniest Sahur Memes 🤣| Try Not To Laugh 🔥#freefire #funny #video #shorts",
+      "title": "ai kiss",
+      "kind": "suggestion",
+      "signal_views": 3136982,
+      "signal_title": "THE KISS OF LIFE - Lesbian Romance Movie | AI Short Film",
       "examples": [
-        "The Funniest Sahur Memes 🤣| Try Not To Laugh 🔥#freefire #funny #video #shorts",
-        "Top New Comedy Video Amazing Funny Video 😂Try To Not Laugh Funny Video Ep 113 By Geetpixel Adda"
+        "THE KISS OF LIFE - Lesbian Romance Movie | AI Short Film"
       ],
-      "videos": 2,
+      "videos": 1,
       "free": true,
-      "lasts": "It stays while these words keep showing up on different videos. Next scan can drop it.",
-      "what": "These two words showed up together on 2 different videos in this scan. Combined views 17,183.",
+      "lasts": "It stays while people keep searching this phrase. Next scan can drop it.",
+      "what": "YouTube suggested 'ai kiss' from the letters after 'ai'. Top public video has 3,136,982 views.",
       "make": [],
       "tools": "",
       "avoid": ""
     },
     {
-      "id": "video-5",
+      "id": "islamic",
       "rank": "#5",
-      "title": "2 Ziddi Pregnant Bow Horror New Special Trending Funny Comedy Video 2026 😂 Ep 186 By Extra Fun Masti",
-      "kind": "video",
-      "signal_views": 77701,
-      "signal_title": "2 Ziddi Pregnant Bow Horror New Special Trending Funny Comedy Video 2026 😂 Ep 186 By Extra Fun Masti",
+      "title": "ai islamic video",
+      "kind": "suggestion",
+      "signal_views": 1660702,
+      "signal_title": "Aik Din Jannat Main | AI Movie Of Heaven | The First Day In Jannah | Islamic Stories | Urdu/hindi",
       "examples": [
-        "2 Ziddi Pregnant Bow Horror New Special Trending Funny Comedy Video 2026 😂 Ep 186 By Extra Fun Masti"
+        "Aik Din Jannat Main | AI Movie Of Heaven | The First Day In Jannah | Islamic Stories | Urdu/hindi"
       ],
       "videos": 1,
       "free": true,
-      "lasts": "One video. It has not repeated often enough to call it a format.",
-      "what": "Highest videos from this scan that did not share a phrase with another video.",
+      "lasts": "It stays while people keep searching this phrase. Next scan can drop it.",
+      "what": "YouTube suggested 'ai islamic video' from the letters after 'ai'. Top public video has 1,660,702 views.",
       "make": [],
       "tools": "",
       "avoid": ""
     },
     {
-      "id": "video-6",
+      "id": "quran",
       "rank": "#6",
-      "title": "Forget Google Flow! 😱 This FREE AI Tool Makes Unlimited Long Videos | image to video ai free 🔥",
-      "kind": "video",
-      "signal_views": 39017,
-      "signal_title": "Forget Google Flow! 😱 This FREE AI Tool Makes Unlimited Long Videos | image to video ai free 🔥",
+      "title": "ai quran",
+      "kind": "suggestion",
+      "signal_views": 1613464,
+      "signal_title": "Story Behind Surah Nas I The World’s First AI-Visualized Quran Series!",
       "examples": [
-        "Forget Google Flow! 😱 This FREE AI Tool Makes Unlimited Long Videos | image to video ai free 🔥"
+        "Story Behind Surah Nas I The World’s First AI-Visualized Quran Series!"
       ],
       "videos": 1,
       "free": true,
-      "lasts": "One video. It has not repeated often enough to call it a format.",
-      "what": "Highest videos from this scan that did not share a phrase with another video.",
+      "lasts": "It stays while people keep searching this phrase. Next scan can drop it.",
+      "what": "YouTube suggested 'ai quran' from the letters after 'ai'. Top public video has 1,613,464 views.",
       "make": [],
       "tools": "",
       "avoid": ""
     },
     {
-      "id": "video-7",
+      "id": "mahabharat",
       "rank": "#7",
-      "title": "Turn Long Videos Into VIRAL Shorts Automatically! 🤯 Klap AI Review 2026",
-      "kind": "video",
-      "signal_views": 36872,
-      "signal_title": "Turn Long Videos Into VIRAL Shorts Automatically! 🤯 Klap AI Review 2026",
+      "title": "ai mahabharat",
+      "kind": "suggestion",
+      "signal_views": 667252,
+      "signal_title": "I Tried AI to Remake JioHotstar Mahabharat: Ek Dharmayudh (Episode 1) | Full AI Remake",
       "examples": [
-        "Turn Long Videos Into VIRAL Shorts Automatically! 🤯 Klap AI Review 2026"
+        "I Tried AI to Remake JioHotstar Mahabharat: Ek Dharmayudh (Episode 1) | Full AI Remake"
       ],
       "videos": 1,
       "free": true,
-      "lasts": "One video. It has not repeated often enough to call it a format.",
-      "what": "Highest videos from this scan that did not share a phrase with another video.",
-      "make": [],
-      "tools": "",
-      "avoid": ""
-    },
-    {
-      "id": "video-8",
-      "rank": "#8",
-      "title": "Reem Series Episode 35 The Final #shorts #youtube_shorts #shorts #shortsfeed #viralshorts2 #explo...",
-      "kind": "video",
-      "signal_views": 36250,
-      "signal_title": "Reem Series Episode 35 The Final #shorts #youtube_shorts #shorts #shortsfeed #viralshorts2 #explo...",
-      "examples": [
-        "Reem Series Episode 35 The Final #shorts #youtube_shorts #shorts #shortsfeed #viralshorts2 #explo..."
+      "lasts": "One myth clip can spike. The same art style lasts longer than a new god every upload.",
+      "what": "YouTube suggested 'ai mahabharat' from the letters after 'ai'. Top public video has 667,252 views.",
+      "make": [
+        "Tell one event in 30 seconds, not the whole story.",
+        "Open on the conflict in the first two seconds.",
+        "Use one art style for the series.",
+        "Caption every line. Keep the voiceover clear of music.",
+        "Label it as AI."
       ],
-      "videos": 1,
-      "free": true,
-      "lasts": "One video. It has not repeated often enough to call it a format.",
-      "what": "Highest videos from this scan that did not share a phrase with another video.",
-      "make": [],
-      "tools": "",
-      "avoid": ""
+      "tools": "A still or video generator, your voice, CapCut.",
+      "avoid": "Stuffing five scenes into 15 seconds."
     }
   ]
 }

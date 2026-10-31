@@ -1,45 +1,75 @@
 #!/usr/bin/env python3
-"""Rebuild the list from a wide YouTube search. No format name is typed in."""
+"""Find formats from YouTube's own suggestions, then rank them by video views.
+
+The stems are only "ai" plus each letter. Baby, horror, dance, and the rest
+are kept only if YouTube suggests them.
+"""
 import json
 import re
-from datetime import date
-from pathlib import Path
 import subprocess
 import sys
+import time
+import urllib.parse
+import urllib.request
+from datetime import date
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data" / "formats.json"
 RECIPES = ROOT / "data" / "recipes.json"
-QUERIES = ["ai shorts", "reels", "funny shorts"]
-# YouTube "this month" style filter. The query itself names no format.
-SP = "CAMSBggCEAEYAw%3D%3D"
-STOP = {
-    "a", "an", "the", "and", "or", "to", "of", "in", "on", "for", "with", "from",
-    "how", "make", "your", "this", "that", "these", "video", "videos", "short",
-    "shorts", "youtube", "new", "trend", "trends", "trending", "part", "full",
-    "official", "best", "top", "you", "just", "what", "when", "where", "who",
-    "will", "can", "its", "are", "was", "were", "not", "but", "all", "out", "get",
-    "one", "two", "into", "over", "than", "then", "also", "only", "very", "more",
-    "most", "some", "any", "our", "their", "his", "her", "she", "him", "they",
-    "them", "now", "see", "today", "instagram", "reels", "reel", "live",
-    "livestream", "viral", "viralvideo", "shortvideo", "ytshorts", "like",
-    "episode", "series", "latest", "watch", "dont", "didn",
-}
-BAD = (
-    "how to", "how i", "kaise banaye", "kaise bana", "tutorial", "full course",
-    "workflow",     "trending song", "compilation", "top 10", "top viral reels",
-    "welcome to our", "official youtube channel",
+GENERIC = {"ai", "video", "videos", "short", "shorts", "viral", "youtube", "wala", "wali"}
+LANG = {"hindi", "english", "tamil", "malayalam", "chinese", "odia", "nepali", "full"}
+DROP = (
+    "kaise", "how to", "how i", "course", "tutorial", "generator", "roadmap",
+    "prompt", "tools", "tool ", "editing", "editor", "monetization", "jobs",
+    "job ", "review", "news", "photo", "image", "website", "glasses",
+    "smartphone", "quiz", "question", "explained", "basics", "kya hai",
+    "kya hota", "matlab", "use kare", "sikhe", "updates", "full movie",
+    "workflow", "app", "unit ", "roadmap", "link", "channel kaise",
+    "song", "songs", "remix", "bhajan", "phone", "nova", "engineer",
+    "bubble", "interview", "robot", "agents", "masterclass", "quantum",
+    "ugc", "youtube", "data center", "qawwali", "xxxtentacion", "giri nandini",
+    "zahra", "jonome", "jibon", "one shot", "zone", "dropshipping",
 )
 
 
-def search(query):
-    url = "https://www.youtube.com/results?search_query=" + query.replace(" ", "+") + "&sp=" + SP
+def suggest(stem):
+    url = (
+        "https://suggestqueries.google.com/complete/search?client=firefox&ds=yt&q="
+        + urllib.parse.quote(stem)
+    )
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    with urllib.request.urlopen(req, timeout=20) as response:
+        payload = json.loads(response.read().decode())
+    return list(payload[1])
+
+
+def words(text):
+    return re.findall(r"[a-z0-9]+", text.lower())
+
+
+def content_key(text):
+    return tuple(w for w in words(text) if w not in GENERIC and w not in LANG and len(w) > 2)
+
+
+def dropped(text):
+    hay = text.lower()
+    return any(bit in hay for bit in DROP)
+
+
+def says_ai(title):
+    return re.search(r"\bai\b", title.lower()) is not None
+
+
+def search_top(query):
+    wanted = content_key(query)
     cmd = [
-        "yt-dlp", "--flat-playlist", "--playlist-end", "30",
-        "--print", "%(view_count)s\t%(title)s", url,
+        "yt-dlp", "--flat-playlist", "--playlist-end", "8",
+        "--print", "%(view_count)s\t%(title)s",
+        "ytsearch8:" + query,
     ]
-    out = subprocess.run(cmd, check=True, capture_output=True, text=True, timeout=120)
-    rows = []
+    out = subprocess.run(cmd, check=True, capture_output=True, text=True, timeout=90)
+    matched = []
     for line in out.stdout.splitlines():
         views, _, title = line.partition("\t")
         try:
@@ -47,26 +77,16 @@ def search(query):
         except ValueError:
             continue
         title = title.strip()
-        if title:
-            rows.append((nviews, title))
-    return rows
-
-
-def tokens(title):
-    found = re.findall(r"[^\W\d_]{3,}", title.lower(), flags=re.UNICODE)
-    return [w for w in found if w not in STOP]
-
-
-def same_video(a, b):
-    left, right = set(tokens(a)), set(tokens(b))
-    if not left or not right:
-        return True
-    return len(left & right) / min(len(left), len(right)) >= 0.5
-
-
-def skipped(title):
-    text = title.lower()
-    return any(bit in text for bit in BAD)
+        if not title or dropped(title):
+            continue
+        hay = title.lower()
+        if wanted and not any(re.search(r"\b" + re.escape(word) + r"\b", hay) for word in wanted):
+            continue
+        matched.append((nviews, title))
+    with_ai = [row for row in matched if says_ai(row[1])]
+    if not with_ai:
+        return None
+    return max(with_ai)
 
 
 def match_recipe(text, recipes):
@@ -77,107 +97,87 @@ def match_recipe(text, recipes):
     return None
 
 
-def main():
-    recipes = json.loads(RECIPES.read_text())
-    seen = {}
-    for query in QUERIES:
+def collect_suggestions():
+    picked = []
+    seen = set()
+    for letter in "abcdefghijklmnopqrstuvwxyz":
+        stem = f"ai {letter}"
         try:
-            rows = search(query)
+            items = suggest(stem)
+        except (OSError, urllib.error.URLError, json.JSONDecodeError) as exc:
+            print(f"suggest skip {stem}: {exc}", file=sys.stderr)
+            time.sleep(0.3)
+            continue
+        kept = 0
+        for item in items:
+            if dropped(item):
+                continue
+            key = content_key(item)
+            if not key or key in seen:
+                continue
+            seen.add(key)
+            picked.append(item)
+            kept += 1
+            if kept >= 3:
+                break
+        time.sleep(0.12)
+    return picked
+
+
+def main():
+    import urllib.error
+    recipes = json.loads(RECIPES.read_text())
+    queries = collect_suggestions()
+    print("suggestions:", ", ".join(queries))
+    rows = []
+    for query in queries:
+        try:
+            hit = search_top(query)
         except (subprocess.SubprocessError, OSError) as exc:
-            print(f"skip {query}: {exc}", file=sys.stderr)
+            print(f"search skip {query}: {exc}", file=sys.stderr)
             continue
-        print(f"{query}: {len(rows)}")
-        for views, title in rows:
-            if skipped(title):
-                continue
-            seen[title] = max(seen.get(title, 0), views)
-
-    buckets = {}
-    for title, views in seen.items():
-        toks = tokens(title)
-        phrases = [f"{a} {b}" for a, b in zip(toks, toks[1:])]
-        for phrase in set(phrases):
-            parts = phrase.split()
-            if any("short" in part or "video" in part for part in parts):
-                continue
-            slot = buckets.setdefault(phrase, {"views": 0, "titles": []})
-            if any(same_video(title, old) for old in slot["titles"]):
-                continue
-            slot["titles"].append(title)
-            slot["views"] += views
-
-    groups = []
-    for phrase, slot in buckets.items():
-        if len(slot["titles"]) < 2:
+        if not hit:
+            print(f"no video {query}")
             continue
-        groups.append((slot["views"], phrase, slot["titles"]))
-    groups.sort(reverse=True)
-
+        views, title = hit
+        rows.append((views, query, title))
+        print(f"{views:10} | {query} | {title[:80]}")
+    rows.sort(reverse=True)
     formats = []
-    used_titles = set()
     recipe_seen = False
-    for views, phrase, titles in groups[:8]:
-        titles = sorted(titles, key=lambda t: seen[t], reverse=True)
-        recipe = match_recipe(phrase + " " + " ".join(titles), recipes)
-        free = False
-        if recipe and not recipe_seen:
-            free = True
+    for views, query, title in rows[:8]:
+        recipe = match_recipe(query + " " + title, recipes)
+        free = True
+        if recipe:
+            free = not recipe_seen
             recipe_seen = True
         formats.append({
-            "id": phrase.replace(" ", "-"),
-            "rank": f"#{len(formats) + 1}",
-            "title": phrase,
-            "kind": "repeated",
+            "id": "-".join(content_key(query)) or f"row-{len(formats)+1}",
+            "rank": f"#{len(formats)+1}",
+            "title": query,
+            "kind": "suggestion",
             "signal_views": views,
-            "signal_title": titles[0],
-            "examples": titles[:3],
-            "videos": len(titles),
-            "free": free if recipe else True,
-            "lasts": recipe["lasts"] if recipe else "It stays while these words keep showing up on different videos. Next scan can drop it.",
-            "what": f"These two words showed up together on {len(titles)} different videos in this scan. Combined views {views:,}.",
+            "signal_title": title,
+            "examples": [title],
+            "videos": 1,
+            "free": free,
+            "lasts": recipe["lasts"] if recipe else "It stays while people keep searching this phrase. Next scan can drop it.",
+            "what": f"YouTube suggested '{query}' from the letters after 'ai'. Top public video has {views:,} views.",
             "make": recipe["make"] if recipe else [],
             "tools": recipe["tools"] if recipe else "",
             "avoid": recipe["avoid"] if recipe else "",
         })
-        used_titles.update(titles)
-        print(f"repeat {phrase}: {len(titles)} videos, {views}")
-
-    if len(formats) < 5:
-        leftover = sorted(seen.items(), key=lambda item: item[1], reverse=True)
-        for title, views in leftover:
-            if title in used_titles:
-                continue
-            formats.append({
-                "id": f"video-{len(formats) + 1}",
-                "rank": f"#{len(formats) + 1}",
-                "title": title,
-                "kind": "video",
-                "signal_views": views,
-                "signal_title": title,
-                "examples": [title],
-                "videos": 1,
-                "free": True,
-                "lasts": "One video. It has not repeated often enough to call it a format.",
-                "what": "Highest videos from this scan that did not share a phrase with another video.",
-                "make": [],
-                "tools": "",
-                "avoid": "",
-            })
-            print(f"video {views} | {title[:80]}")
-            if len(formats) >= 8:
-                break
-
     doc = {
         "updated": date.today().isoformat(),
         "source": (
-            "Built from a YouTube search for recent ai shorts, reels, and funny shorts. "
-            "No format name is typed in. A card is a two-word phrase that showed up on more than one video. "
-            "A phrase that is not in the title still will not be grouped."
+            "YouTube's own suggestions for 'ai' plus each letter. "
+            "No format name is typed in. Suggestions that are tutorials or tools are dropped, "
+            "then the rest are ranked by the top video's views."
         ),
         "formats": formats,
     }
     DATA.write_text(json.dumps(doc, indent=2, ensure_ascii=False) + "\n")
-    print(f"wrote {len(formats)} cards from {len(seen)} videos")
+    print(f"wrote {len(formats)}")
 
 
 if __name__ == "__main__":
