@@ -1,5 +1,5 @@
-const CACHE = "abhichal-v1";
-const ASSETS = ["./", "./index.html", "./style.css", "./app.js", "./trends.js", "./pay-config.js", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png"];
+const CACHE = "abhichal-v2";
+const ASSETS = ["./", "./index.html", "./style.css", "./app.js", "./trends.js", "./pay-config.js?v=2", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png"];
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
 });
