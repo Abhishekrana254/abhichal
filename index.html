@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0c0c10" />
+  <meta name="description" content="Aaj ka Reels trend aur seedha shoot list. Prompt nahi." />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="icons/icon-512.png" />
+  <title>AbhiChal</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="kicker">31 Oct 2026</div>
+  <h1>Abhi kya chal raha hai</h1>
+  <p class="sub">Trend ka naam, kab se hai, aur phone pe kaise shoot karna hai. Prompt nahi likhna.</p>
+  <nav class="nav">
+    <a href="#list">Trends</a>
+    <a href="#audio">Audio</a>
+    <a href="#hisab">Hisaab</a>
+  </nav>
+  <div id="list"></div>
+  <h2 id="audio">India audio, aaj</h2>
+  <p class="meta">Naam Instagram ke audio search mein daalo. File mat download karna.</p>
+  <div id="audio-list"></div>
+  <section class="hisab" id="hisab">
+    <h2>Hisaab</h2>
+    <p class="meta">Roz Google Ads ka spend aur Razorpay ki kharid yahan likho. Yahi se pata chalega badhana hai ya kaatna hai.</p>
+    <label>Ads spend aaj ₹ <input id="spend" inputmode="numeric" placeholder="100" /></label>
+    <label>Kitne log site pe aaye <input id="visits" inputmode="numeric" placeholder="0" /></label>
+    <label>Kitne ne ₹149 diya <input id="buys" inputmode="numeric" placeholder="0" /></label>
+    <button id="save" type="button">Aaj save karo</button>
+    <div id="result"></div>
+    <div id="log"></div>
+  </section>
+  <p class="small">Prices aur dates 31 Oct 2026 ke public Reels charts se. Agle hafta list badlegi. Payment Razorpay se, AdSense nahi.</p>
+  <div class="bar">
+    <div class="inner">
+      <button id="buy" class="buy" type="button">Baaki recipes ₹149</button>
+    </div>
+  </div>
+  <script src="pay-config.js"></script>
+  <script src="trends.js"></script>
+  <script src="app.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
+  </script>
+</body>
+</html>
