@@ -2,48 +2,50 @@ const KEY = "abhichal-paid";
 const LOG = "abhichal-hisab";
 const paid = () => localStorage.getItem(KEY) === "1";
 
+function views(n) {
+  return new Intl.NumberFormat("en-US").format(n);
+}
+
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
 function card(t) {
   const open = t.free || paid();
-  const head = `<span class="tag">${t.rank}</span> <span class="tag dim">${t.potential}</span>`;
-  const why = `<p class="meta">${t.where} · ${t.since} · ${t.seconds}</p><p><b>Views kyun.</b> ${t.why}</p><p class="meta">Kitne din. ${t.lasts}</p>`;
+  const head = `<span class="tag">${esc(t.rank)}</span> <span class="tag dim">${views(t.signal_views)} views</span>`;
+  const body = `<h2>${esc(t.title)}</h2>
+    <p class="meta">Top public result: ${esc(t.signal_title)}</p>
+    <p>${esc(t.what)}</p>
+    <p class="meta">${esc(t.lasts)}</p>`;
   if (!open) {
-    return `<article class="locked">${head}<h2>${t.title}</h2>${why}<p>Shoot list ₹149 mein.</p></article>`;
+    return `<article class="locked">${head}${body}<p>Recipe is in the ₹149 pack.</p></article>`;
   }
-  return `<article class="card">
-    ${head}
-    <h2>${t.title}</h2>
-    ${why}
-    <p><b>Hook.</b> ${t.hook}</p>
-    <p><b>Sound.</b> ${t.sound}</p>
-    <b>Shoot</b>
-    <ol>${t.shots.map((s) => `<li>${s}</li>`).join("")}</ol>
-    <b>Edit</b>
-    <ol>${t.edit.map((s) => `<li>${s}</li>`).join("")}</ol>
-    <p><b>End.</b> ${t.end}</p>
-    <p><b>Caption.</b> ${t.caption}</p>
-    <p class="meta">Mat karo: ${t.avoid}</p>
+  return `<article class="card">${head}${body}
+    <p><b>How to make it</b></p>
+    <ol>${t.make.map((s) => `<li>${esc(s)}</li>`).join("")}</ol>
+    <p><b>Tools.</b> ${esc(t.tools)}</p>
+    <p class="meta">Skip: ${esc(t.avoid)}</p>
   </article>`;
 }
 
-function render() {
-  document.getElementById("list").innerHTML = window.TRENDS.map(card).join("");
-  document.getElementById("audio-list").innerHTML = window.AUDIO.map(
-    (a) => `<article class="audio"><b>${a.name}</b><div class="meta">${a.note}</div></article>`
-  ).join("");
+function render(doc) {
+  document.getElementById("updated").textContent = doc.updated;
+  document.getElementById("source").textContent = doc.source;
+  document.getElementById("list").innerHTML = doc.formats.map(card).join("");
   const buy = document.getElementById("buy");
-  if (paid()) buy.textContent = "Pack khul chuka hai";
+  if (paid()) buy.textContent = "Pack is open";
 }
 
 function unlock() {
   localStorage.setItem(KEY, "1");
-  render();
+  if (window.FORMATS) render(window.FORMATS);
 }
 
 document.getElementById("buy").onclick = async () => {
   if (paid()) return;
   const cfg = window.ABHICHAL || {};
   if (!cfg.razorpayKey) {
-    alert("Razorpay key abhi khali hai. Key daalne ke baad yahi button payment kholega.");
+    alert("Payment key is missing.");
     return;
   }
   if (!window.Razorpay) {
@@ -59,7 +61,7 @@ document.getElementById("buy").onclick = async () => {
     key: cfg.razorpayKey,
     amount: cfg.amountPaise,
     currency: "INR",
-    name: "YehBanao",
+    name: "Formatly",
     description: cfg.packName,
     handler() { unlock(); }
   });
@@ -89,11 +91,19 @@ document.getElementById("save").onclick = () => {
   localStorage.setItem(LOG, JSON.stringify(list.slice(0, 30)));
   const back = spend ? Math.round((buys * 149 / spend) * 100) : 0;
   const line = back >= 100
-    ? `${back}% wapas aaya. Kal budget same ya thoda upar.`
-    : `${back}% wapas aaya. 100% se neeche hai, budget mat badhana.`;
-  document.getElementById("result").innerHTML = `<p class="${back >= 100 ? "good" : "bad"}">${line}</p><p class="meta">${visits} visits, ${buys} kharid, ₹${buys * 149} kamai, ₹${spend} ads.</p>`;
+    ? `${back}% back. Keep the budget, or raise it a little.`
+    : `${back}% back. That is under 100%. Do not raise the budget.`;
+  document.getElementById("result").innerHTML = `<p class="${back >= 100 ? "good" : "bad"}">${line}</p><p class="meta">${visits} visits, ${buys} purchases, ₹${buys * 149} in, ₹${spend} on ads.</p>`;
   paintLog();
 };
 
-render();
+fetch("./data/formats.json?v=4")
+  .then((r) => r.json())
+  .then((doc) => {
+    window.FORMATS = doc;
+    render(doc);
+  })
+  .catch(() => {
+    document.getElementById("list").innerHTML = "<p>Could not load the format list.</p>";
+  });
 paintLog();

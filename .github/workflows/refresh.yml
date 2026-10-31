@@ -1,0 +1,26 @@
+name: Refresh format signals
+
+on:
+  schedule:
+    - cron: "0 3 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install yt-dlp
+      - run: python scripts/refresh_signals.py
+      - name: Commit updated signals
+        run: |
+          git add data/formats.json
+          git diff --cached --quiet && exit 0
+          git -c user.name=Formatly -c user.email=actions@github.com commit -m "Update format signals from public YouTube search."
+          git push

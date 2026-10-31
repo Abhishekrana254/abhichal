@@ -1,57 +1,48 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0c0c10" />
-  <meta name="description" content="Is hafte ka #1 Reel format aur uska shoot list. Chart nahi." />
+  <meta name="description" content="Which short-video formats are getting views this week, and how to make one." />
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="icons/icon-192.png" />
   <link rel="apple-touch-icon" href="icons/icon-512.png" />
-  <title>YehBanao</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Formatly</title>
+  <link rel="stylesheet" href="style.css?v=4" />
 </head>
 <body>
-  <div class="kicker">31 Oct 2026 · India Reels</div>
-  <h1>YehBanao</h1>
-  <p class="sub">Is hafte views ke liye ek format. #1 ka poora shoot neeche hai. Baaki paanch ₹149.</p>
+  <div class="kicker">Updated <span id="updated">31 Oct 2026</span></div>
+  <h1>Formatly</h1>
+  <p class="sub">Which kind of video is getting views, and the steps to make it. A sound chart does not tell you this.</p>
   <section class="card gap">
-    <h2>Doosre apps yahin atak jaate hain</h2>
+    <h2>What this is</h2>
     <ol>
-      <li>TrendTok sound dikhata hai. Us sound pe pehle se lakhs videos hain.</li>
-      <li>Virlo chart deta hai, $49 mahine. Aaj kaunsa video banana hai, woh nahi.</li>
-      <li>AI baby ke blogs 6 tools ginate hain. Kaunsa format pehle, woh nahi.</li>
+      <li>Hashtag and sound apps list audio. Creators put generic tags on AI videos, so those apps miss the format.</li>
+      <li>Formatly groups the videos: AI baby skit, dance swap, talking character, mythology, horror episode.</li>
+      <li>The number on each card is the top public YouTube result for that search. Instagram does not publish this count.</li>
     </ol>
-    <p>Yahan pehle number hai, phir script. Ek baar ₹149. Koi weekly charge nahi.</p>
+    <p>The #1 recipe is open. The other four are ₹149, once. No weekly charge.</p>
   </section>
-  <nav class="nav">
-    <a href="#list">Trends</a>
-    <a href="#audio">Audio</a>
-    <a href="#hisab">Hisaab</a>
-  </nav>
   <div id="list"></div>
-  <h2 id="audio">Ye sounds mat pakdo</h2>
-  <p class="meta">Inpe pehle se 8 lakh se 18 lakh reels hain. Naya account inse views nahi leta. #1 aur #2 ko gaane ki zaroorat nahi.</p>
-  <div id="audio-list"></div>
   <section class="hisab" id="hisab">
-    <h2>Hisaab</h2>
-    <p class="meta">Roz Google Ads ka spend aur Razorpay ki kharid yahan likho. Yahi se pata chalega badhana hai ya kaatna hai.</p>
-    <label>Ads spend aaj ₹ <input id="spend" inputmode="numeric" placeholder="100" /></label>
-    <label>Kitne log site pe aaye <input id="visits" inputmode="numeric" placeholder="0" /></label>
-    <label>Kitne ne ₹149 diya <input id="buys" inputmode="numeric" placeholder="0" /></label>
-    <button id="save" type="button">Aaj save karo</button>
+    <h2>Ledger</h2>
+    <p class="meta">Each day, type ad spend, visits, and how many people paid ₹149. Scale only if this stays at 100% or more.</p>
+    <label>Ad spend today ₹ <input id="spend" inputmode="numeric" placeholder="100" /></label>
+    <label>Visits <input id="visits" inputmode="numeric" placeholder="0" /></label>
+    <label>Purchases <input id="buys" inputmode="numeric" placeholder="0" /></label>
+    <button id="save" type="button">Save today</button>
     <div id="result"></div>
     <div id="log"></div>
   </section>
-  <p class="small">#1 is hafte ka format hai, live view counter nahi. Dates 31 Oct 2026. Agle hafta number badal sakta hai. Payment ek baar, Razorpay se.</p>
+  <p class="small" id="source"></p>
   <div class="bar">
     <div class="inner">
-      <button id="buy" class="buy" type="button">Baaki 5 shoot lists ₹149</button>
+      <button id="buy" class="buy" type="button">Other 4 recipes ₹149</button>
     </div>
   </div>
-  <script src="pay-config.js?v=3"></script>
-  <script src="trends.js?v=3"></script>
-  <script src="app.js?v=3"></script>
+  <script src="pay-config.js?v=4"></script>
+  <script src="app.js?v=4"></script>
   <script>
     if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
   </script>

@@ -1,5 +1,5 @@
-const CACHE = "abhichal-v3";
-const ASSETS = ["./", "./index.html", "./style.css", "./app.js?v=3", "./trends.js?v=3", "./pay-config.js?v=3", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png"];
+const CACHE = "formatly-v4";
+const ASSETS = ["./", "./index.html", "./style.css?v=4", "./app.js?v=4", "./pay-config.js?v=4", "./data/formats.json?v=4", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png"];
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
 });
@@ -8,5 +8,11 @@ self.addEventListener("activate", (e) => {
 });
 self.addEventListener("fetch", (e) => {
   if (e.request.method !== "GET") return;
-  e.respondWith(caches.match(e.request).then((hit) => hit || fetch(e.request)));
+  e.respondWith(
+    fetch(e.request).then((res) => {
+      const copy = res.clone();
+      caches.open(CACHE).then((c) => c.put(e.request, copy));
+      return res;
+    }).catch(() => caches.match(e.request))
+  );
 });
