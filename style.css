@@ -5,6 +5,7 @@ h1 { font-size: 34px; line-height: 1; margin: 8px 0; letter-spacing: -0.04em; }
 .kicker { color: #ff4d2e; font-weight: 700; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; }
 .sub { color: #a1a1aa; margin: 0 0 18px; }
 .card, .locked, .audio, .hisab { background: #17171c; border-radius: 16px; padding: 16px; margin: 0 0 12px; }
+.gap { border: 1px solid #3f3f46; }
 .meta { color: #a1a1aa; font-size: 13px; }
 h2 { font-size: 20px; margin: 4px 0 8px; }
 ol { margin: 8px 0; padding-left: 18px; }

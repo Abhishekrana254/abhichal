@@ -3,5 +3,5 @@ window.ABHICHAL = {
   razorpayKey: "rzp_live_TuVnJOStCqxIZb",
   amountPaise: 14900,
   priceLabel: "₹149",
-  packName: "AbhiChal — is hafte ke recipes"
+  packName: "YehBanao — is hafte ke shoot lists"
 };

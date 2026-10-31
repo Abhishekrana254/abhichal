@@ -4,25 +4,34 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0c0c10" />
-  <meta name="description" content="Aaj ka Reels trend aur seedha shoot list. Prompt nahi." />
+  <meta name="description" content="Is hafte ka #1 Reel format aur uska shoot list. Chart nahi." />
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="icons/icon-192.png" />
   <link rel="apple-touch-icon" href="icons/icon-512.png" />
-  <title>AbhiChal</title>
+  <title>YehBanao</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="kicker">31 Oct 2026</div>
-  <h1>Abhi kya chal raha hai</h1>
-  <p class="sub">Trend ka naam, kab se hai, aur phone pe kaise shoot karna hai. Prompt nahi likhna.</p>
+  <div class="kicker">31 Oct 2026 · India Reels</div>
+  <h1>YehBanao</h1>
+  <p class="sub">Is hafte views ke liye ek format. #1 ka poora shoot neeche hai. Baaki paanch ₹149.</p>
+  <section class="card gap">
+    <h2>Doosre apps yahin atak jaate hain</h2>
+    <ol>
+      <li>TrendTok sound dikhata hai. Us sound pe pehle se lakhs videos hain.</li>
+      <li>Virlo chart deta hai, $49 mahine. Aaj kaunsa video banana hai, woh nahi.</li>
+      <li>AI baby ke blogs 6 tools ginate hain. Kaunsa format pehle, woh nahi.</li>
+    </ol>
+    <p>Yahan pehle number hai, phir script. Ek baar ₹149. Koi weekly charge nahi.</p>
+  </section>
   <nav class="nav">
     <a href="#list">Trends</a>
     <a href="#audio">Audio</a>
     <a href="#hisab">Hisaab</a>
   </nav>
   <div id="list"></div>
-  <h2 id="audio">India audio, aaj</h2>
-  <p class="meta">Naam Instagram ke audio search mein daalo. File mat download karna.</p>
+  <h2 id="audio">Ye sounds mat pakdo</h2>
+  <p class="meta">Inpe pehle se 8 lakh se 18 lakh reels hain. Naya account inse views nahi leta. #1 aur #2 ko gaane ki zaroorat nahi.</p>
   <div id="audio-list"></div>
   <section class="hisab" id="hisab">
     <h2>Hisaab</h2>
@@ -34,15 +43,15 @@
     <div id="result"></div>
     <div id="log"></div>
   </section>
-  <p class="small">Prices aur dates 31 Oct 2026 ke public Reels charts se. Agle hafta list badlegi. Payment Razorpay se, AdSense nahi.</p>
+  <p class="small">#1 is hafte ka format hai, live view counter nahi. Dates 31 Oct 2026. Agle hafta number badal sakta hai. Payment ek baar, Razorpay se.</p>
   <div class="bar">
     <div class="inner">
-      <button id="buy" class="buy" type="button">Baaki recipes ₹149</button>
+      <button id="buy" class="buy" type="button">Baaki 5 shoot lists ₹149</button>
     </div>
   </div>
-  <script src="pay-config.js?v=2"></script>
-  <script src="trends.js"></script>
-  <script src="app.js"></script>
+  <script src="pay-config.js?v=3"></script>
+  <script src="trends.js?v=3"></script>
+  <script src="app.js?v=3"></script>
   <script>
     if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
   </script>

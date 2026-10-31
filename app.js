@@ -4,13 +4,15 @@ const paid = () => localStorage.getItem(KEY) === "1";
 
 function card(t) {
   const open = t.free || paid();
+  const head = `<span class="tag">${t.rank}</span> <span class="tag dim">${t.potential}</span>`;
+  const why = `<p class="meta">${t.where} · ${t.since} · ${t.seconds}</p><p><b>Views kyun.</b> ${t.why}</p><p class="meta">Kitne din. ${t.lasts}</p>`;
   if (!open) {
-    return `<article class="locked"><span class="tag dim">₹149</span><h2>${t.title}</h2><p class="meta">${t.where} · ${t.since} · ${t.heat}</p><p>Shoot list lock hai.</p></article>`;
+    return `<article class="locked">${head}<h2>${t.title}</h2>${why}<p>Shoot list ₹149 mein.</p></article>`;
   }
   return `<article class="card">
-    <span class="tag">${t.free ? "Free" : "Pack"}</span>
+    ${head}
     <h2>${t.title}</h2>
-    <p class="meta">${t.where} · shuru ${t.since} · ${t.heat} · ${t.seconds}</p>
+    ${why}
     <p><b>Hook.</b> ${t.hook}</p>
     <p><b>Sound.</b> ${t.sound}</p>
     <b>Shoot</b>
@@ -57,7 +59,7 @@ document.getElementById("buy").onclick = async () => {
     key: cfg.razorpayKey,
     amount: cfg.amountPaise,
     currency: "INR",
-    name: "AbhiChal",
+    name: "YehBanao",
     description: cfg.packName,
     handler() { unlock(); }
   });
