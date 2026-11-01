@@ -1,0 +1,38 @@
+{
+  "id": "baby",
+  "lasts": "A one-off baby clip stops getting views in about a week. The same face, voice, and room can keep going.",
+  "steps": [
+    "Make one baby face and save it. Do not start from a real child's photo.",
+    "Pick one room and keep it. A new set every episode looks like a new channel.",
+    "Write four lines only: a request, a pause, a complaint, a last line that flips the request.",
+    "Record those four lines in your own voice. Do not clone a real person's voice.",
+    "Turn the still into a talking clip. Caption every line in big type.",
+    "Turn on the synthetic-content label. The next episode uses the same baby and the same room."
+  ],
+  "shape": "Baby: you cut it?\nWorker: yes.\nBaby: why?\nWorker: the last line answers a different question than the one the baby asked.",
+  "stack": {
+    "Script": "ChatGPT, Gemini, or Claude",
+    "Face": "Any image generator that keeps a character consistent from a reference",
+    "Motion": "Veo 3.1, Kling 3.0, Hailuo 2.3, or Seedance 2.0. Pick one and check its free tier today",
+    "Voice": "Your own voice. If you use text-to-speech, use one whose licence allows monetised videos",
+    "Edit": "CapCut"
+  },
+  "prompts": [
+    {
+      "label": "1. Script prompt",
+      "tool": "Paste into ChatGPT, Gemini, or Claude",
+      "text": "You write short comedy scripts for an original AI baby character named [NAME]. Setting: [ROOM, e.g. a small kitchen]. The baby speaks like a tired [adult type, e.g. shopkeeper, electrician, schoolteacher].\n\nWrite [3] episodes. Each episode has exactly four lines:\n1. A request.\n2. A reply from the adult that misses the point.\n3. The baby's complaint.\n4. A last line that flips the request.\n\nLanguage: [Hinglish in Roman script / Hindi / English]. At most 14 words per line. No real people, no brand names, no jokes about a real child.\n\nOutput a table with columns: line number, speaker, spoken line, on-screen caption, a five-word shot note."
+    },
+    {
+      "label": "2. Character sheet prompt",
+      "tool": "Paste into your image generator",
+      "text": "Character sheet of one original fictional baby, about one year old, round face, [HAIR], wearing [OUTFIT, e.g. a yellow kurta]. Three views: front, three-quarter, side. Plain light grey background, soft studio light, the same face in all three views, clear eyes, no text, no logo. Soft 3D animation look. This is an invented character, not a real child."
+    },
+    {
+      "label": "3. Scene prompt",
+      "tool": "Paste into your video tool, with the character sheet as the reference image",
+      "text": "Static medium shot in [ROOM]. The baby [NAME] sits in [a high chair] and looks into the camera. The baby says: \"[LINE]\". Lips match the speech. A small head tilt on the last word. Soft daylight, no camera shake, 6 seconds. Keep the face identical to the reference image. No text on screen."
+    }
+  ],
+  "avoid": "A real child's face, a copied voice, or another channel's exact story. Change the joke, the room, and the voice in every episode so YouTube does not read the channel as templated."
+}

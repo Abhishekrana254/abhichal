@@ -1,4 +1,4 @@
-name: Refresh format signals
+name: Weekly scan
 
 on:
   schedule:
@@ -8,19 +8,25 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: weekly-scan
+  cancel-in-progress: false
+
 jobs:
-  refresh:
+  scan:
     runs-on: ubuntu-latest
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - run: pip install yt-dlp
-      - run: python scripts/refresh_signals.py
-      - name: Commit updated signals
+      - run: python scripts/build_catalog.py
+      - run: python scripts/refresh_live.py
+      - name: Commit this week's scan
         run: |
-          git add data/formats.json
+          git add data/catalog.json data/live.json data/radar.json
           git diff --cached --quiet && exit 0
-          git -c user.name=Formatly -c user.email=actions@github.com commit -m "Update format signals from public YouTube search."
+          git -c user.name=Formatly -c user.email=actions@github.com commit -m "Weekly scan: top videos and radar."
           git push

@@ -3,41 +3,38 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#f4f1ea" />
-  <meta name="description" content="AI video formats for YouTube and Instagram, and how to shoot each one." />
+  <meta name="theme-color" content="#09090b" />
+  <meta name="description" content="What is working in AI video this week, on YouTube and Instagram. Real top videos, sourced earnings, and the master prompts to make each one." />
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="icons/icon-192.png" />
   <link rel="apple-touch-icon" href="icons/icon-512.png" />
-  <title>Formatly</title>
-  <link rel="stylesheet" href="style.css?v=10" />
+  <title>Formatly: what is working in AI video this week</title>
+  <link rel="stylesheet" href="style.css?v=11" />
 </head>
 <body>
-  <header class="top">
-    <div>
-      <div class="kicker">AI formats · YouTube and Instagram</div>
-      <h1>Formatly</h1>
+  <header class="nav">
+    <div class="wrap">
+      <a class="logo" href="#/"><i></i>Formatly</a>
+      <nav>
+        <a href="#/" data-go="movers">This week</a>
+        <a href="#/" data-go="browse">Niches</a>
+        <a href="#/" data-go="calc">Earnings</a>
+        <a href="#/" data-go="stack">Tools</a>
+        <a href="#/" data-go="pricing">Pricing</a>
+      </nav>
+      <span class="spacer"></span>
+      <span id="passchip"></span>
     </div>
-    <p class="sub">Hundreds of niches exist. This page teaches the AI ones. Open a card for the shoot: length, lines, and what to repeat next time.</p>
   </header>
-  <div class="filters">
-    <button type="button" class="on" data-filter="all">Both</button>
-    <button type="button" data-filter="youtube">YouTube</button>
-    <button type="button" data-filter="instagram">Instagram</button>
-  </div>
-  <div id="list"></div>
-  <section class="hisab" id="hisab">
-    <h2>Ledger</h2>
-    <p class="small">Type today’s ad spend, visits, and ₹149 purchases. Scale only if this stays at 100% or more.</p>
-    <label>Ad spend today ₹ <input id="spend" inputmode="numeric" placeholder="100" /></label>
-    <label>Visits <input id="visits" inputmode="numeric" placeholder="0" /></label>
-    <label>Purchases <input id="buys" inputmode="numeric" placeholder="0" /></label>
-    <button id="save" type="button">Save today</button>
-    <div id="result"></div>
-    <div id="log"></div>
-  </section>
-  <p class="small" id="source"></p>
-  <script src="pay-config.js?v=10"></script>
-  <script src="app.js?v=10"></script>
+  <main id="app" class="wrap"><p style="padding:80px 0;color:#9b9ba6">Loading this week's scan…</p></main>
+  <footer>
+    <div class="wrap">
+      <div><a href="terms.html">Terms and refunds</a><a href="#/" data-go="sources">Sources</a></div>
+      <div>Estimates, not payouts. Formatly is not financial advice.</div>
+    </div>
+  </footer>
+  <script src="pay-config.js?v=11"></script>
+  <script src="app.js?v=11"></script>
   <script>
     if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
   </script>

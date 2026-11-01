@@ -1,5 +1,5 @@
-const CACHE = "formatly-v10";
-const ASSETS = ["./", "./index.html", "./style.css?v=10", "./app.js?v=10", "./pay-config.js?v=10", "./data/niches.json?v=10", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png"];
+const CACHE = "formatly-v11";
+const ASSETS = ["./", "./index.html", "./style.css?v=11", "./app.js?v=11", "./pay-config.js?v=11", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png"];
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
 });
@@ -10,8 +10,10 @@ self.addEventListener("fetch", (e) => {
   if (e.request.method !== "GET") return;
   e.respondWith(
     fetch(e.request).then((res) => {
-      const copy = res.clone();
-      caches.open(CACHE).then((c) => c.put(e.request, copy));
+      if (res.ok && new URL(e.request.url).origin === location.origin) {
+        const copy = res.clone();
+        caches.open(CACHE).then((c) => c.put(e.request, copy));
+      }
       return res;
     }).catch(() => caches.match(e.request))
   );
