@@ -9,7 +9,7 @@
   <link rel="icon" href="icons/icon-192.png" />
   <link rel="apple-touch-icon" href="icons/icon-512.png" />
   <title>Formatly: what is working in AI video this week</title>
-  <link rel="stylesheet" href="style.css?v=11" />
+  <link rel="stylesheet" href="style.css?v=12" />
 </head>
 <body>
   <header class="nav">
@@ -23,18 +23,19 @@
         <a href="#/" data-go="pricing">Pricing</a>
       </nav>
       <span class="spacer"></span>
+      <button class="btn ghost" id="installbtn" data-install hidden>Install app</button>
       <span id="passchip"></span>
     </div>
   </header>
   <main id="app" class="wrap"><p style="padding:80px 0;color:#9b9ba6">Loading this week's scan…</p></main>
   <footer>
     <div class="wrap">
-      <div><a href="terms.html">Terms and refunds</a><a href="#/" data-go="sources">Sources</a></div>
+      <div><a href="terms.html">Terms and refunds</a><a href="privacy.html">Privacy</a><a href="contact.html">Contact</a><a href="#/" data-go="sources">Sources</a></div>
       <div>Estimates, not payouts. Formatly is not financial advice.</div>
     </div>
   </footer>
-  <script src="pay-config.js?v=11"></script>
-  <script src="app.js?v=11"></script>
+  <script src="pay-config.js?v=12"></script>
+  <script src="app.js?v=12"></script>
   <script>
     if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
   </script>

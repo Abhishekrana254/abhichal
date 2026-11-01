@@ -239,3 +239,42 @@ footer a { color: #c9c9d1; margin-right: 16px; }
   html { scroll-behavior: auto; }
   .card, .mover, .btn { transition: none; }
 }
+
+/* ---- members: modals, forms, lesson detail ---- */
+.noscroll { overflow: hidden; }
+.link { background: none; border: 0; color: var(--muted); font: inherit; font-size: 14px; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; padding: 8px 6px; }
+.link:hover { color: var(--text); }
+.btn.ok { background: transparent; color: var(--accent); border: 1px solid #3b4a12; }
+#passchip { display: inline-flex; align-items: center; gap: 4px; }
+.modal { position: fixed; inset: 0; z-index: 100; background: rgba(0, 0, 0, 0.7); display: grid; place-items: center; padding: 16px; overflow: auto; }
+.modal-card { position: relative; width: min(480px, 100%); background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 26px 24px 22px; max-height: calc(100vh - 32px); overflow: auto; }
+.modal-card h3 { margin: 0 0 10px; font-size: 20px; letter-spacing: -0.01em; }
+.modal-x { position: absolute; top: 10px; right: 12px; background: none; border: 0; color: var(--muted); font-size: 26px; line-height: 1; cursor: pointer; }
+.modal-card label { display: block; font-size: 13px; color: var(--muted); margin: 12px 0 0; }
+.modal-card input:not([type=checkbox]), .modal-card textarea, .modal-card select { display: block; width: 100%; margin-top: 6px; background: var(--ink); border: 1px solid var(--line); border-radius: 10px; padding: 11px 12px; color: var(--text); font: inherit; font-size: 15px; }
+.modal-card input:focus, .modal-card textarea:focus, .modal-card select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.modal-card label.check { display: flex; gap: 10px; align-items: flex-start; color: var(--text); font-size: 13px; line-height: 1.45; margin: 16px 0 6px; }
+.modal-card label.check input { margin-top: 2px; width: 18px; height: 18px; accent-color: var(--accent); flex: none; }
+.modal-card .btn.big { width: 100%; justify-content: center; margin-top: 14px; }
+.modal-card .btn[disabled] { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+.modal-card .row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.modal-card .fine { font-size: 12px; color: var(--muted); margin: 12px 0 0; }
+.modal-card .msg { min-height: 20px; font-size: 13px; color: var(--muted); margin: 10px 0 0; }
+.modal-card .msg.bad { color: #ff8a8a; }
+.modal-card code { background: var(--ink); padding: 2px 6px; border-radius: 6px; font-size: 12.5px; }
+.keybox { background: var(--ink); border: 1px dashed #4a5a18; border-radius: 12px; padding: 16px; margin: 14px 0 0; font-family: var(--mono); font-size: 16px; text-align: center; color: var(--accent); user-select: all; word-break: break-all; white-space: pre-wrap; }
+.acct { margin: 6px 0 0; }
+.acct > div { display: flex; justify-content: space-between; gap: 14px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+.acct dt { color: var(--muted); } .acct dd { margin: 0; text-align: right; }
+.panel h4 { margin: 22px 0 8px; font-size: 13px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); font-weight: 650; }
+.checks, .rules, .srcs { margin: 0; padding-left: 18px; color: #d9d9e0; font-size: 14px; line-height: 1.55; }
+.checks li, .rules li, .srcs li { margin: 5px 0; }
+.srcs a { color: #cfd6ff; }
+.example { margin-top: 12px; border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; background: var(--surface2); }
+.example b { font-size: 12px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); }
+.example pre { white-space: pre-wrap; font-family: var(--mono); font-size: 12.5px; color: #d9d9e0; margin: 8px 0; }
+.example p { margin: 0; color: var(--muted); font-size: 13px; }
+.prompt pre { max-height: 460px; overflow: auto; }
+.gate-box .link { display: block; margin: 6px auto 0; }
+@media (max-width: 720px) { #installbtn { display: none !important; } .modal-card { padding: 22px 18px 18px; } }
+@media (max-width: 720px) { #passchip { gap: 2px; } #passchip .link { white-space: nowrap; font-size: 13px; padding: 8px 4px; } #passchip .btn { padding: 9px 12px; font-size: 13px; white-space: nowrap; } }

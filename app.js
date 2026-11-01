@@ -1,7 +1,5 @@
 "use strict";
 
-const PASS_KEY = "formatly-pass";
-const PASS_DAYS = 30;
 const PRICE = 149;
 const INR_PER_USD = 96.7; // US Federal Reserve H.10, 9 Oct 2026, as quoted by fluxnote.io
 const SHORTS_RPM = { us: 0.328, in: 0.008 }; // US$ per 1,000 views, AIR Media-Tech partner data
@@ -25,63 +23,258 @@ const STYLE_NAME = {
 
 const state = { q: "", group: "all", reach: "all", ai: "all", sort: "views", shown: PAGE };
 const calc = { views: 500000, kind: "long", aud: "in", niche: "" };
-let CAT = null, LIVE = { niches: {} }, RADAR = { items: [] }, FREE = null, PRO = null, proLoading = null;
+let CAT = null, LIVE = { niches: {} }, RADAR = { items: [] }, FREE = null;
 let pendingScroll = null;
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
-/* ---------- pass ---------- */
-function pass() {
+/* ---------- account, payments, analytics ---------- */
+const CFG = window.ABHICHAL || {};
+const API = String(CFG.api || "").replace(/\/$/, "");
+const TOKEN_KEY = "formatly-token", VID_KEY = "formatly-vid";
+let ME = null;          // account info from /api/me, or null when signed out
+const LESSONS = {};     // paid lessons, fetched from the API only after sign-in
+let currentNiche = "";
+
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch { /* private mode */ } },
+  del(k) { try { localStorage.removeItem(k); } catch { /* private mode */ } }
+};
+const token = () => store.get(TOKEN_KEY) || "";
+function visitorId() {
+  let v = store.get(VID_KEY);
+  if (!v) { v = (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2) + Date.now()); store.set(VID_KEY, v); }
+  return v;
+}
+const doNotTrack = () => navigator.doNotTrack === "1" || window.doNotTrack === "1";
+function track(t, extra) {
+  if (!API || doNotTrack()) return;
+  let ref = "";
+  try { ref = document.referrer ? new URL(document.referrer).hostname : ""; } catch { /* ignore */ }
+  if (ref === location.hostname) ref = "";
+  const first = t === "pv";
+  const body = JSON.stringify({
+    t, vid: visitorId(),
+    ref: first ? ref : undefined,
+    utm: first ? new URLSearchParams(location.search).get("utm_source") || "" : undefined,
+    dev: /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ? "m" : "d",
+    ...(extra || {})
+  });
+  try { fetch(API + "/api/event", { method: "POST", headers: { "Content-Type": "application/json" }, body, keepalive: true }).catch(() => {}); } catch { /* ignore */ }
+}
+async function api(path, opt) {
+  if (!API) throw new Error("The members service is not connected yet.");
+  const h = { "Content-Type": "application/json" };
+  if (token()) h.Authorization = "Bearer " + token();
+  const r = await fetch(API + path, { ...(opt || {}), headers: h });
+  let j = {};
+  try { j = await r.json(); } catch { /* empty body */ }
+  if (!r.ok) { const e = new Error(j.error || "Something went wrong. Please try again."); e.status = r.status; throw e; }
+  return j;
+}
+async function refreshMe() {
+  if (!token()) { ME = null; return; }
   try {
-    const p = JSON.parse(localStorage.getItem(PASS_KEY) || "null");
-    return p && p.until > Date.now() ? p : null;
-  } catch { return null; }
-}
-const paid = () => Boolean(pass());
-function grant(paymentId) {
-  localStorage.setItem(PASS_KEY, JSON.stringify({ until: Date.now() + PASS_DAYS * 864e5, pid: paymentId || "" }));
-  loadPro().then(route);
-}
-function loadPro() {
-  if (PRO) return Promise.resolve(PRO);
-  if (!proLoading) {
-    proLoading = fetch("./data/pro.json?v=11").then((r) => r.json()).then((d) => (PRO = d)).catch(() => { proLoading = null; return null; });
+    const m = await api("/api/me");
+    if (m.token) store.set(TOKEN_KEY, m.token);
+    ME = m;
+  } catch (e) {
+    if (e.status === 401) { store.del(TOKEN_KEY); ME = null; }
   }
-  return proLoading;
 }
-async function buy() {
-  const cfg = window.ABHICHAL || {};
-  if (!cfg.razorpayKey) { alert("Payment key is missing."); return; }
+const paid = () => Boolean(ME && ME.active);
+async function loadLesson(id) {
+  if (LESSONS[id]) return LESSONS[id];
+  return (LESSONS[id] = await api("/api/lesson?id=" + encodeURIComponent(id)));
+}
+function signOut() {
+  store.del(TOKEN_KEY); ME = null;
+  Object.keys(LESSONS).forEach((k) => delete LESSONS[k]);
+  closeModal(); route();
+}
+
+/* ---------- modals ---------- */
+function closeModal() { const m = $("#modal"); if (m) { m.remove(); document.body.classList.remove("noscroll"); } }
+function modal(html, onMount) {
+  closeModal();
+  const d = document.createElement("div");
+  d.className = "modal"; d.id = "modal";
+  d.innerHTML = `<div class="modal-card" role="dialog" aria-modal="true"><button class="modal-x" aria-label="Close" data-close>×</button>${html}</div>`;
+  d.addEventListener("click", (e) => { if (e.target === d || e.target.closest("[data-close]")) closeModal(); });
+  document.body.appendChild(d);
+  document.body.classList.add("noscroll");
+  if (onMount) onMount(d);
+  const f = d.querySelector("input:not([type=checkbox]),textarea");
+  if (f) f.focus();
+}
+const fld = (d, id) => $("#" + id, d);
+function say(d, msg, bad) { const m = $(".msg", d); if (m) { m.textContent = msg || ""; m.className = "msg" + (bad ? " bad" : ""); } }
+
+function buyModal() {
+  track("buy_click");
+  modal(`<h3>Formatly Pro</h3>
+    <p class="sub" style="margin-top:0">₹${PRICE} now, then ₹${PRICE} every month until you cancel. Cancel in one click from your account. You keep access until the month you paid for ends.</p>
+    <label>Email<input id="b-email" type="email" autocomplete="email" placeholder="you@example.com" required></label>
+    <label>Name (optional)<input id="b-name" type="text" autocomplete="name" maxlength="60"></label>
+    <label class="check"><input id="b-agree" type="checkbox"><span>I agree to the <a href="terms.html" target="_blank" rel="noopener">terms</a> and the <a href="privacy.html" target="_blank" rel="noopener">privacy policy</a>, and that Razorpay will charge ₹${PRICE} every month (UPI AutoPay or card) until I cancel.</span></label>
+    <p class="msg"></p>
+    <button class="btn big" id="b-go">Continue to payment</button>
+    <p class="fine">Payments run on Razorpay. We never see your card or UPI PIN. Already a member? <button class="link" data-restore>Restore access</button></p>`, (d) => {
+    fld(d, "b-go").onclick = async () => {
+      const email = fld(d, "b-email").value.trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return say(d, "Enter a valid email address.", true);
+      if (!fld(d, "b-agree").checked) return say(d, "Please tick the box to continue.", true);
+      fld(d, "b-go").disabled = true; say(d, "Creating your secure checkout…");
+      try {
+        const c = await api("/api/checkout", { method: "POST", body: JSON.stringify({ email, name: fld(d, "b-name").value, agree: true, vid: visitorId() }) });
+        await openRazorpay(c, d);
+      } catch (e) { fld(d, "b-go").disabled = false; say(d, e.message, true); }
+    };
+  });
+}
+async function openRazorpay(c, d) {
   if (!window.Razorpay) {
     await new Promise((resolve, reject) => {
       const s = document.createElement("script");
-      s.src = "https://checkout.razorpay.com/v1/checkout.js";
-      s.onload = resolve; s.onerror = reject;
+      s.src = "https://checkout.razorpay.com/v1/checkout.js"; s.onload = resolve; s.onerror = reject;
       document.head.appendChild(s);
-    }).catch(() => alert("Could not load the payment window. Check your connection."));
+    }).catch(() => {});
   }
-  if (!window.Razorpay) return;
-  new Razorpay({
-    key: cfg.razorpayKey,
-    amount: cfg.amountPaise,
-    currency: "INR",
-    name: "Formatly",
-    description: cfg.packName,
-    theme: { color: "#d7ff3f" },
-    handler(resp) { grant(resp && resp.razorpay_payment_id); }
-  }).open();
+  if (!window.Razorpay) throw new Error("Could not load the payment window. Check your connection and try again.");
+  const rz = new Razorpay({
+    key: c.key, subscription_id: c.subscription_id, name: "Formatly", description: c.description,
+    prefill: { email: c.email }, theme: { color: "#d7ff3f" },
+    modal: { ondismiss() { track("checkout_dismiss"); if (d) { fld(d, "b-go").disabled = false; say(d, ""); } } },
+    async handler(resp) { await finishPayment(resp); }
+  });
+  rz.on && rz.on("payment.failed", () => { if (d) say(d, "The payment did not go through. You were not charged for Pro. Try again or use another method.", true); });
+  track("checkout_open");
+  rz.open();
+}
+async function finishPayment(resp) {
+  modal(`<h3>Confirming your payment…</h3><p class="sub">This takes a few seconds. Please do not close this page.</p>`);
+  try {
+    const r = await api("/api/verify", { method: "POST", body: JSON.stringify({ razorpay_payment_id: resp.razorpay_payment_id, razorpay_subscription_id: resp.razorpay_subscription_id, razorpay_signature: resp.razorpay_signature }) });
+    store.set(TOKEN_KEY, r.token);
+    track("paid_ok");
+    await refreshMe(); paintChip();
+    keyModal(r.recoveryKey, true);
+    route();
+  } catch (e) {
+    modal(`<h3>Payment received, access is pending</h3><p class="sub">${esc(e.message)}</p><p class="sub">Your payment ID: <code>${esc(resp.razorpay_payment_id || "")}</code>. Keep it. Tap Restore access with your email and this ID, or contact us and we will fix it the same day.</p><div class="row"><button class="btn" data-restore>Restore access</button><button class="btn ghost" data-contact>Contact us</button></div>`);
+  }
+}
+function keyModal(key, firstTime) {
+  modal(`<h3>${firstTime ? "You are in. Save this key." : "Your new recovery key"}</h3>
+    <p class="sub" style="margin-top:0">This key signs you in on another phone or computer. It is shown once and we store only a scrambled copy. Lost it? You can still sign in with your email and the Razorpay payment ID from your receipt.</p>
+    <pre class="keybox" id="k-key">${esc(key)}</pre>
+    <div class="row"><button class="btn" id="k-copy">Copy key</button><button class="btn ghost" id="k-dl">Download</button></div>
+    <label class="check"><input id="k-ok" type="checkbox"><span>I saved my recovery key.</span></label>
+    <button class="btn big" id="k-done" disabled>Open my lessons</button>`, (d) => {
+    fld(d, "k-copy").onclick = () => { navigator.clipboard && navigator.clipboard.writeText(key); fld(d, "k-copy").textContent = "Copied"; };
+    fld(d, "k-dl").onclick = () => { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob(["Formatly recovery key\n" + key + "\n"], { type: "text/plain" })); a.download = "formatly-recovery-key.txt"; a.click(); };
+    fld(d, "k-ok").onchange = () => { fld(d, "k-done").disabled = !fld(d, "k-ok").checked; };
+    fld(d, "k-done").onclick = closeModal;
+  });
+}
+function restoreModal() {
+  modal(`<h3>Restore access</h3>
+    <p class="sub" style="margin-top:0">Already paid? Sign in with your recovery key.</p>
+    <label>Recovery key<input id="r-key" placeholder="FMLY-XXXX-XXXX-XXXX-XXXX-XXXX" autocomplete="off" spellcheck="false"></label>
+    <button class="btn big" id="r-go">Sign in</button>
+    <p class="sub" style="margin:18px 0 8px">No key? Use your email and the payment ID from your Razorpay receipt (starts with <code>pay_</code>).</p>
+    <label>Email<input id="r-email" type="email" autocomplete="email"></label>
+    <label>Payment ID<input id="r-pay" placeholder="pay_XXXXXXXXXXXXXX" autocomplete="off" spellcheck="false"></label>
+    <button class="btn" id="r-go2">Sign in with email and payment ID</button>
+    <p class="msg"></p>`, (d) => {
+    const go = async (body) => {
+      say(d, "Checking…");
+      try {
+        const r = await api("/api/restore", { method: "POST", body: JSON.stringify(body) });
+        store.set(TOKEN_KEY, r.token); track("restore_ok");
+        await refreshMe(); paintChip(); route();
+        if (r.recoveryKey) keyModal(r.recoveryKey, false); else closeModal();
+      } catch (e) { say(d, e.message, true); }
+    };
+    fld(d, "r-go").onclick = () => { const k = fld(d, "r-key").value.trim(); if (!k) return say(d, "Paste your recovery key.", true); go({ recoveryKey: k }); };
+    fld(d, "r-go2").onclick = () => { go({ email: fld(d, "r-email").value.trim(), paymentId: fld(d, "r-pay").value.trim() }); };
+  });
+}
+function accountModal() {
+  if (!ME) return restoreModal();
+  const st = ME.cancelRequested ? "Cancelled. Access ends " + fmtDate(new Date(ME.paidUntil)) : paid() ? (ME.renewsAt ? "Renews on " + fmtDate(new Date(ME.renewsAt)) : "Active until " + fmtDate(new Date(ME.paidUntil))) : "Access ended " + fmtDate(new Date(ME.paidUntil || Date.now()));
+  modal(`<h3>Your account</h3>
+    <dl class="acct"><div><dt>Email</dt><dd>${esc(ME.email)}</dd></div><div><dt>Plan</dt><dd>Formatly Pro, ₹${PRICE} a month</dd></div><div><dt>Status</dt><dd>${esc(st)}</dd></div><div><dt>Months paid</dt><dd>${ME.paidCount || 0}</dd></div></dl>
+    <div class="row">
+      ${paid() && !ME.cancelRequested ? '<button class="btn ghost" id="a-cancel">Cancel renewal</button>' : ""}
+      ${!paid() ? `<button class="btn" data-buy>Renew · ₹${PRICE}/month</button>` : ""}
+      <button class="btn ghost" data-contact>Contact us</button>
+      <button class="btn ghost" id="a-out">Sign out</button>
+    </div>
+    <p class="msg"></p>
+    <p class="fine">Need your key on another device? Sign in there with your email and payment ID, which also creates a fresh key.</p>`, (d) => {
+    fld(d, "a-out").onclick = signOut;
+    const c = fld(d, "a-cancel");
+    if (c) c.onclick = async () => {
+      if (!confirm("Stop future charges? You keep access until " + fmtDate(new Date(ME.paidUntil)) + ".")) return;
+      say(d, "Cancelling…");
+      try { await api("/api/cancel", { method: "POST", body: "{}" }); await refreshMe(); paintChip(); accountModal(); }
+      catch (e) { say(d, e.message, true); }
+    };
+  });
+}
+function contactModal(kind) {
+  modal(`<h3>Contact us</h3>
+    <p class="sub" style="margin-top:0">Payment taken but no access? Something broken? Tell us. We reply by email${CFG.supportEmail ? " (or write to " + esc(CFG.supportEmail) + ")" : ""}.</p>
+    <label>Your email<input id="c-email" type="email" autocomplete="email" value="${esc(ME ? ME.email : "")}"></label>
+    <label>Topic<select id="c-kind"><option value="payment">Payment or billing</option><option value="access">I cannot get in</option><option value="bug">Something is broken</option><option value="idea">Idea or request</option><option value="other">Other</option></select></label>
+    <label>Message<textarea id="c-msg" rows="5" maxlength="2000"></textarea></label>
+    <label>Razorpay payment ID (if you have one)<input id="c-pay" placeholder="pay_…"></label>
+    <p class="msg"></p>
+    <button class="btn big" id="c-go">Send</button>`, (d) => {
+    if (kind) fld(d, "c-kind").value = kind;
+    fld(d, "c-go").onclick = async () => {
+      say(d, "Sending…");
+      try {
+        await api("/api/contact", { method: "POST", body: JSON.stringify({ email: fld(d, "c-email").value, kind: fld(d, "c-kind").value, message: fld(d, "c-msg").value, paymentId: fld(d, "c-pay").value }) });
+        track("contact"); modal(`<h3>Sent</h3><p class="sub">Thank you. We will reply to your email.</p>`);
+      } catch (e) { say(d, e.message, true); }
+    };
+  });
 }
 function paintChip() {
-  const p = pass();
   const el = $("#passchip");
-  if (p) {
-    el.innerHTML = `<span class="chip-pass">Pro until ${esc(fmtDate(new Date(p.until)))}</span>`;
+  if (!el) return;
+  if (ME) el.innerHTML = paid() ? '<button class="btn ok" data-account>Pro · Account</button>' : `<button class="btn" data-account>Renew · Account</button>`;
+  else el.innerHTML = `<button class="link" data-restore>Sign in</button><button class="btn" data-buy>Unlock all · ₹${PRICE}/month</button>`;
+}
+
+/* ---------- install and engagement tracking ---------- */
+let deferredInstall = null;
+const standalone = () => window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+function paintInstall() {
+  const b = $("#installbtn");
+  if (!b) return;
+  const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  b.hidden = standalone() || !(deferredInstall || ios);
+}
+window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); deferredInstall = e; track("install_prompt"); paintInstall(); });
+window.addEventListener("appinstalled", () => { track("installed"); deferredInstall = null; paintInstall(); });
+async function installApp() {
+  if (deferredInstall) {
+    track("install_click");
+    deferredInstall.prompt();
+    try { await deferredInstall.userChoice; } catch { /* ignore */ }
+    deferredInstall = null; paintInstall();
   } else {
-    el.innerHTML = `<button class="btn" data-buy>Unlock all · ₹${PRICE}/month</button>`;
+    track("ios_hint");
+    modal(`<h3>Install Formatly</h3><p class="sub">On iPhone: tap the Share button in Safari, then Add to Home Screen. Formatly then opens like an app.</p>`);
   }
 }
+try { if (standalone() && !sessionStorage.getItem("fm-standalone")) { sessionStorage.setItem("fm-standalone", "1"); setTimeout(() => track("standalone"), 800); } } catch { /* ignore */ }
 
 /* ---------- format helpers ---------- */
 function fmtViews(n) {
@@ -144,15 +337,6 @@ function liveOf(id) {
 }
 const topViews = (n) => (liveOf(n.id).top[0] ? liveOf(n.id).top[0].views : 0);
 const strictViews = (n) => { const t = liveOf(n.id).top[0]; return t && !t.loose ? t.views : 0; };
-function lesson(n) {
-  if (n.recipe === "baby") return { kind: "recipe", data: FREE, stack: FREE.stack, free: true };
-  if (!PRO) return null;
-  if (n.recipe && PRO.recipes[n.recipe]) return { kind: "recipe", data: PRO.recipes[n.recipe], stack: PRO.stack };
-  const st = PRO.styles[n.style];
-  return st ? { kind: "style", data: st, stack: PRO.stack, style: n.style } : null;
-}
-const canOpen = (n) => n.recipe === "baby" || paid();
-
 /* ---------- estimate ---------- */
 function estimate() {
   const n = calc.niche ? nicheById(calc.niche) : null;
@@ -315,8 +499,9 @@ function homeHTML() {
     <table class="tbl">
       <thead><tr><th>Tool</th><th>Good for</th><th>Watch for</th></tr></thead>
       <tbody>
+        <tr><td><b>Google Flow</b> (Omni Flash, Veo 3.1)</td><td>Our default. Vertical 9:16, ingredient images keep a character the same, saved voices keep a voice the same (Omni Flash).</td><td>One clip is 8 to 10 seconds. Voice references only work together with ingredients. Check the model picker for what your plan includes.</td></tr>
         <tr><td><b>Veo 3.1</b> (Google)</td><td>Cinematic shots that follow the prompt, with sound generated in the clip.</td><td>Short clips, about 4 to 8 seconds. Costly to retry.</td></tr>
-        <tr><td><b>Kling 3.0</b></td><td>Consistent characters, dialogue with lip-sync, 10 to 15 second shots.</td><td>Read its licence for monetised use.</td></tr>
+        <tr><td><b>Kling 3.0</b></td><td>Motion Control copies a dance from your own clip onto a character image. Dialogue with lip-sync, 10 to 15 second shots.</td><td>Read its licence for monetised use.</td></tr>
         <tr><td><b>Hailuo 2.3</b></td><td>Expressive faces and close-ups. Fast and low cost.</td><td>Clips cap near 6 to 10 seconds.</td></tr>
         <tr><td><b>Seedance 2.0</b></td><td>Motion-heavy shots and dance. Led one public benchmark in 2026.</td><td>Access varies by country.</td></tr>
         <tr><td><b>Runway Gen-4.5</b></td><td>Directed work: keyframes, image-to-video, restyling a clip.</td><td>More control means more steps.</td></tr>
@@ -332,16 +517,16 @@ function homeHTML() {
     <div class="price">
       <div class="plan pro">
         <h3>Pro</h3>
-        <div class="p">₹${PRICE}<small> / 30 days</small></div>
+        <div class="p">₹${PRICE}<small> / month</small></div>
         <ul>
-          <li>All ${recipes} AI format recipes, step by step</li>
-          <li>Master prompts for script, character, and scene, ready to copy</li>
-          <li>A playbook with prompts for every other niche (${total} in all)</li>
-          <li>Each Monday: new top videos and new phrases on the radar</li>
-          <li>The tool stack for each recipe</li>
+          <li>All ${recipes} AI formats as full recipes: a master prompt for ChatGPT that writes your Google Flow prompts</li>
+          <li>Character lock and voice lock blocks so the same cast and voice come back every episode</li>
+          <li>The input to send each time, an example, the Flow settings and a pre-post checklist</li>
+          <li>A playbook with its own master prompt for every other niche (${total} in all)</li>
+          <li>Each lesson lists the sources it was researched from, and the platform rules that apply</li>
         </ul>
-        ${paid() ? '<span class="chip-pass">Pro is on</span>' : `<button class="btn big" data-buy>Unlock 30 days · ₹${PRICE}</button>`}
-        <p class="fine">One payment buys 30 days on this device. It does not renew by itself. <a href="terms.html">Terms and refunds</a>.</p>
+        ${paid() ? '<button class="btn big ghost" data-account>Pro is on · Account</button>' : `<button class="btn big" data-buy>Unlock · ₹${PRICE}/month</button>`}
+        <p class="fine">₹${PRICE} every month by UPI AutoPay or card, through Razorpay. Cancel anytime in your account and keep access to the end of the month you paid for. <a href="terms.html">Terms and refunds</a>.</p>
       </div>
       <div class="plan free">
         <h3>Free</h3>
@@ -363,7 +548,10 @@ function homeHTML() {
       <details><summary>How is "this week" measured?</summary><p>Every Monday a script runs a YouTube search for each niche, limited to videos uploaded that week and sorted by views, and records the top three. Where a result does not look like the niche, the page marks it as a loose match. Instagram has no public counters, so Instagram fit is a judgement about the format, not a measurement.</p></details>
       <details><summary>Does Instagram pay per view in India?</summary><p>No. Instagram's own help page says its bonus programs are invite-only and run in the US, South Korea, and Japan. In India, money comes from gifts, subscriptions (10,000 followers), brand deals, affiliate links, or selling your own product. Views are how you reach those.</p></details>
       <details><summary>Will I get these views?</summary><p>No promise. A top video this week shows what an audience is watching. It does not say what a new channel will get.</p></details>
-      <details><summary>Does Pro renew by itself?</summary><p>No. ₹149 buys 30 days on the device you pay from. Pay again to extend. Automatic renewal needs a different setup that is not live yet.</p></details>
+      <details><summary>Does Pro renew by itself? How do I cancel?</summary><p>Yes. Pro is ₹149 a month and renews on its own through Razorpay (UPI AutoPay or card). Open Account, press Cancel renewal, and no further charge is made. You keep access until the end of the month you already paid for. Razorpay may ask you to approve the mandate in your UPI app the first time.</p></details>
+      <details><summary>How do I sign in on another phone or computer?</summary><p>After paying you get a recovery key, shown once. Choose Sign in, then paste it. If you lost it, sign in with your email and the payment ID (starts with pay_) from your Razorpay receipt. That also gives you a fresh key.</p></details>
+      <details><summary>I paid but I have no access</summary><p>Press Sign in, then use your email and the payment ID from the receipt. If that still fails, use Contact us at the bottom of the page and include the payment ID. We fix it the same day.</p></details>
+      <details><summary>What do you store about me?</summary><p>Your email, name and the phone number Razorpay shares, your subscription status, and anonymous page counts. No card or UPI details ever reach us. See the <a href="privacy.html">privacy policy</a>.</p></details>
       <details><summary>Do I have to mark AI videos?</summary><p>YouTube has a setting to disclose realistic altered or synthetic content. Turn it on. Every recipe says so, and every recipe uses original characters, not real people.</p></details>
     </div>
   </section>
@@ -393,33 +581,69 @@ function bindHome() {
 /* ---------- niche page ---------- */
 function promptHTML(p, n) {
   const text = p.text.replace(/\[NICHE\]/g, n.name);
-  const shown = esc(text).replace(/\[[^\]]+\]/g, (m) => `<mark>${m}</mark>`);
-  return `<div class="prompt"><header><div><b>${esc(p.label)}</b><small>${esc(p.tool)}</small></div><button class="copy" data-copy="${esc(text).replace(/\n/g, "&#10;")}">Copy</button></header><pre>${shown}</pre></div>`;
+  const shown = esc(text).replace(/\[[^\]\n]{1,80}\]/g, (m) => `<mark>${m}</mark>`);
+  return `<div class="prompt"><header><div><b>${esc(p.label)}</b><small>${esc(p.tool || "")}</small></div><button class="copy" data-copy="${esc(text).replace(/\n/g, "&#10;")}">Copy</button></header><pre>${shown}</pre></div>`;
 }
-function lessonHTML(n) {
-  const L = lesson(n);
-  const open = canOpen(n);
-  if (!open || !L) {
-    const isRecipe = Boolean(n.recipe);
-    return `<div class="cols locked">
-      <div class="panel ghost"><h3>How to make it</h3><ol class="steps">${Array.from({ length: 6 }, () => '<li>Placeholder line that stays hidden until the pass is on, six steps in all.</li>').join("")}</ol></div>
-      <div class="panel ghost"><h3>Master prompts</h3><div class="prompt"><header><b>1. Script prompt</b></header><pre>Placeholder prompt text that stays hidden until the pass is on. Three prompts in all, ready to copy.</pre></div><div class="prompt"><pre>Placeholder prompt text.</pre></div></div>
-      <div class="gate"><div class="gate-box"><span class="badge b-F">Pro</span><b>${isRecipe ? "Full recipe and master prompts" : "Playbook and master prompts"}</b><p>6 steps, 3 copy-ready prompts, and the tool stack for ${esc(n.name)}. ₹${PRICE} for 30 days.</p><button class="btn big" data-buy>Unlock 30 days · ₹${PRICE}</button></div></div>
-    </div>`;
-  }
-  const d = L.data;
-  const stack = Object.entries(L.stack).map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("");
-  const title = L.kind === "recipe" ? "How to make it" : `Playbook: ${STYLE_NAME[L.style]}`;
-  const note = L.kind === "style" ? `<p class="sub" style="margin:-6px 0 14px">This playbook covers the whole format. Fill the highlighted [BRACKETS] with your topic inside ${esc(n.name)}.</p>` : "";
+const liHTML = (a) => (a || []).map((s) => `<li>${esc(s)}</li>`).join("");
+function lessonBody(d, n, o) {
+  o = o || {};
+  const stack = Object.entries(d.stack || {}).map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("");
+  const note = d.kind === "style" ? `<p class="sub" style="margin:-6px 0 14px">This playbook covers the whole format. Wherever you see [NICHE], write ${esc(n.name)}. Fill the other highlighted [BRACKETS] once.</p>` : "";
+  const how = `<p class="sub" style="margin:-4px 0 12px">Make a ChatGPT project (or a Custom GPT, or a Cursor rule). Paste this once as its instructions. After that you only send the short input in box 3 each time, and it returns prompts ready for Flow.</p>`;
+  const ex = d.example ? `<div class="example"><b>Example input</b><pre>${esc(d.example.input)}</pre><p>${esc(d.example.note || "")}</p></div>` : "";
   return `<div class="cols">
-    <div class="panel"><h3>${esc(title)}</h3>${note}<ol class="steps">${d.steps.map((s) => `<li>${esc(s)}</li>`).join("")}</ol>
-      ${d.shape ? `<h3 style="margin-top:22px">Shape of the script</h3><div class="shape">${esc(d.shape)}</div>` : ""}
-      ${d.lasts ? `<p class="sub" style="margin-top:16px"><b style="color:#f5f5f4">How long it lasts.</b> ${esc(d.lasts)}</p>` : ""}
+    <div class="panel"><h3>${d.kind === "style" ? "Playbook: " + esc(d.title) : esc(d.title)}</h3>${note}
+      <p class="sub" style="margin:0 0 14px"><b style="color:#f5f5f4">Why it lasts.</b> ${esc(d.lasts)}</p>
+      <h4>Tool stack</h4><dl class="stack">${stack}</dl>
+      <h4>Set up once</h4><ol class="steps">${liHTML(d.setup)}</ol>
+      <h4>Every video</h4><ol class="steps">${liHTML(d.loop)}</ol>
+      <h4>Settings in Flow or the video tool</h4><ol class="steps plain">${liHTML(d.flow)}</ol>
+      <h4>Check before you post</h4><ul class="checks">${liHTML(d.qc)}</ul>
       <p class="avoid">${esc(d.avoid)}</p>
-      <h3 style="margin-top:22px">Tool stack</h3><dl class="stack">${stack}</dl>
+      <h4>Platform rules for this format</h4><ul class="rules">${liHTML(d.policy)}</ul>
+      <h4>Researched from</h4><ul class="srcs">${(d.sources || []).map((s) => `<li><a href="${esc(s.u)}" target="_blank" rel="noopener">${esc(s.t)}</a></li>`).join("")}</ul>
+      ${o.licensed ? `<p class="fine" style="margin-top:18px">Licensed to ${esc(o.licensed)} for personal use. Please do not share or resell the prompts.</p>` : ""}
     </div>
-    <div><div class="panel"><h3>Master prompts</h3>${d.prompts.map((p) => promptHTML(p, n)).join("")}<p class="fine">Fill in the highlighted [BRACKETS]. Keep characters original and turn on the synthetic-content label.</p></div></div>
+    <div>
+      <div class="panel"><h3>1 · Master prompt, paste once</h3>${how}${promptHTML(d.master, n)}</div>
+      ${(d.locks || []).length ? `<div class="panel" style="margin-top:16px"><h3>2 · Locks, your look and voice</h3><p class="sub" style="margin:-4px 0 12px">These blocks are already inside the master prompt. Fill the highlighted [BRACKETS] once and then never change a word.</p>${d.locks.map((l) => promptHTML(l, n)).join("")}</div>` : ""}
+      <div class="panel" style="margin-top:16px"><h3>${(d.locks || []).length ? "3" : "2"} · What you send each time</h3>${promptHTML(d.input, n)}${ex}</div>
+    </div>
   </div>`;
+}
+function lockedLesson(n, why) {
+  const isRecipe = Boolean(n.recipe);
+  return `<div class="cols locked">
+      <div class="panel ghost"><h3>How to make it</h3><ol class="steps">${Array.from({ length: 6 }, () => "<li>Placeholder line that stays hidden until you are a Pro member, six steps in all.</li>").join("")}</ol></div>
+      <div class="panel ghost"><h3>Master prompt</h3><div class="prompt"><header><b>1. Master prompt</b></header><pre>Placeholder text that stays hidden until you are a Pro member. The real prompt is not in this page.</pre></div><div class="prompt"><pre>Placeholder text.</pre></div></div>
+      <div class="gate"><div class="gate-box"><span class="badge b-F">Pro</span><b>${isRecipe ? "Full recipe, master prompt and locks" : "Full playbook and master prompt"}</b><p>${why ? esc(why) + " " : ""}The ChatGPT master prompt, the character and voice locks, the Flow settings, the checklist and the sources for ${esc(n.name)}. ₹${PRICE} a month, cancel anytime.</p><button class="btn big" data-buy>Unlock · ₹${PRICE}/month</button><button class="link" data-restore>Already a member? Sign in</button></div></div>
+    </div>`;
+}
+async function hydrateLesson(n) {
+  const slot = $("#lesson-slot");
+  if (!slot) return;
+  if (n.recipe === "baby") { slot.innerHTML = lessonBody(FREE, n); bindCopy(); return; }
+  if (!paid()) { slot.innerHTML = lockedLesson(n); return; }
+  slot.innerHTML = '<p class="sub" style="padding:30px 0">Loading your lesson…</p>';
+  const id = n.recipe || n.style;
+  try {
+    const r = await loadLesson(id);
+    if (currentNiche !== n.id) return;
+    slot.innerHTML = lessonBody(r.lesson, n, { licensed: r.licensedTo });
+    bindCopy();
+  } catch (e) {
+    if (currentNiche !== n.id) return;
+    if (e.status === 401 || e.status === 402) { await refreshMe(); paintChip(); slot.innerHTML = lockedLesson(n, e.message); }
+    else slot.innerHTML = `<p class="sub" style="padding:30px 0">Could not load the lesson. ${esc(e.message)} <button class="btn" data-retry>Try again</button></p>`;
+  }
+}
+function bindCopy() {
+  $$(".copy").forEach((b) => (b.onclick = () => {
+    const t = b.getAttribute("data-copy");
+    const done = () => { b.textContent = "Copied"; b.classList.add("done"); setTimeout(() => { b.textContent = "Copy"; b.classList.remove("done"); }, 1400); };
+    if (navigator.clipboard) navigator.clipboard.writeText(t).then(done, done);
+    else { const ta = document.createElement("textarea"); ta.value = t; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove(); done(); }
+  }));
 }
 function nicheHTML(n) {
   const lv = liveOf(n.id);
@@ -450,19 +674,15 @@ function nicheHTML(n) {
     <div class="vids">${vids || '<p class="sub">The scan found no videos for this phrase this week.</p>'}</div>
   </section>
 
-  <section><div class="sec-h"><div><h2>Make it</h2></div></div>${lessonHTML(n)}</section>
+  <section><div class="sec-h"><div><h2>Make it</h2></div></div><div id="lesson-slot"></div></section>
 
   <section><div class="sec-h"><div><h2>What it could earn</h2></div></div>${calcHTML()}<div style="margin-top:14px">${igBox}</div>${reel}</section>`;
 }
 function bindNiche(n) {
   calc.niche = n.id;
-  $$(".copy").forEach((b) => (b.onclick = () => {
-    const t = b.getAttribute("data-copy");
-    const done = () => { b.textContent = "Copied"; b.classList.add("done"); setTimeout(() => { b.textContent = "Copy"; b.classList.remove("done"); }, 1400); };
-    if (navigator.clipboard) navigator.clipboard.writeText(t).then(done, done);
-    else { const ta = document.createElement("textarea"); ta.value = t; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove(); done(); }
-  }));
+  currentNiche = n.id;
   bindCalc();
+  hydrateLesson(n);
 }
 
 /* ---------- routing ---------- */
@@ -475,11 +695,14 @@ function route() {
     const n = nicheById(m[1]);
     calc.niche = n.id;
     app.innerHTML = nicheHTML(n);
+    track("pv"); track("niche", { nid: n.id });
     bindNiche(n);
     document.title = n.name + " · Formatly";
     window.scrollTo(0, 0);
   } else {
+    currentNiche = "";
     app.innerHTML = homeHTML();
+    track("pv");
     bindHome();
     document.title = "Formatly: what is working in AI video this week";
     if (pendingScroll) { const t = $("#" + pendingScroll); pendingScroll = null; if (t) t.scrollIntoView(); }
@@ -487,7 +710,13 @@ function route() {
 }
 document.addEventListener("click", (e) => {
   const buyBtn = e.target.closest("[data-buy]");
-  if (buyBtn) { buy(); return; }
+  if (buyBtn) { e.preventDefault(); if (paid()) { accountModal(); return; } buyModal(); return; }
+  if (e.target.closest("[data-restore]")) { e.preventDefault(); restoreModal(); return; }
+  if (e.target.closest("[data-account]")) { e.preventDefault(); accountModal(); return; }
+  const ct = e.target.closest("[data-contact]");
+  if (ct) { e.preventDefault(); contactModal(); return; }
+  if (e.target.closest("[data-install]")) { e.preventDefault(); installApp(); return; }
+  if (e.target.closest("[data-retry]")) { const n = currentNiche && nicheById(currentNiche); if (n) hydrateLesson(n); return; }
   const go = e.target.closest("[data-go]");
   if (go) {
     e.preventDefault();
@@ -500,13 +729,13 @@ document.addEventListener("click", (e) => {
 window.addEventListener("hashchange", route);
 
 Promise.all([
-  fetch("./data/catalog.json?v=11").then((r) => r.json()),
-  fetch("./data/live.json?v=11").then((r) => (r.ok ? r.json() : { niches: {} })).catch(() => ({ niches: {} })),
-  fetch("./data/radar.json?v=11").then((r) => (r.ok ? r.json() : { items: [] })).catch(() => ({ items: [] })),
-  fetch("./data/free.json?v=11").then((r) => r.json())
+  fetch("./data/catalog.json?v=12").then((r) => r.json()),
+  fetch("./data/live.json?v=12").then((r) => (r.ok ? r.json() : { niches: {} })).catch(() => ({ niches: {} })),
+  fetch("./data/radar.json?v=12").then((r) => (r.ok ? r.json() : { items: [] })).catch(() => ({ items: [] })),
+  fetch("./data/free.json?v=12").then((r) => r.json())
 ]).then(([cat, live, radar, free]) => {
   CAT = cat; LIVE = live; RADAR = radar; FREE = free;
-  return paid() ? loadPro() : null;
-}).then(route).catch(() => {
+  return refreshMe();
+}).then(() => { paintInstall(); route(); }).catch(() => {
   $("#app").innerHTML = '<p style="padding:80px 0;color:#9b9ba6">Could not load the scan. Refresh the page.</p>';
 });

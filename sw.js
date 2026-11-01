@@ -1,5 +1,5 @@
-const CACHE = "formatly-v11";
-const ASSETS = ["./", "./index.html", "./style.css?v=11", "./app.js?v=11", "./pay-config.js?v=11", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png"];
+const CACHE = "formatly-v12";
+const ASSETS = ["./", "./index.html", "./style.css?v=12", "./app.js?v=12", "./pay-config.js?v=12", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png"];
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
 });

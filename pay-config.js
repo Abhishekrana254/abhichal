@@ -1,7 +1,7 @@
-/** Razorpay Key Id only. The secret key never goes in this repo. */
+/** Public settings only. The Razorpay secret never lives in this repo; it is on the private API. */
 window.ABHICHAL = {
   razorpayKey: "rzp_live_TuVnJOStCqxIZb",
-  amountPaise: 14900,
+  api: "https://formatly-api.vercel.app",
   priceLabel: "₹149",
-  packName: "Formatly Pro, 30 days"
+  supportEmail: ""
 };

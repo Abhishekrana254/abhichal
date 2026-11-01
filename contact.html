@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#09090b" />
+  <title>Contact · Formatly</title>
+  <link rel="stylesheet" href="style.css?v=12" />
+  <style>
+    .doc { max-width: 720px; padding: 40px 0 20px; }
+    .doc h1 { font-size: 44px; margin: 10px 0 18px; }
+    .doc h2 { font-size: 22px; margin: 28px 0 8px; letter-spacing: -0.03em; }
+    .doc p, .doc li { color: #c9c9d1; }
+    .doc label { display: block; font-size: 13px; color: var(--muted); margin: 14px 0 0; }
+    .doc input, .doc textarea, .doc select { display: block; width: 100%; margin-top: 6px; background: var(--ink); border: 1px solid var(--line); border-radius: 10px; padding: 11px 12px; color: var(--text); font: inherit; font-size: 15px; }
+    .doc .msg { min-height: 22px; color: var(--muted); font-size: 14px; }
+    .doc .msg.bad { color: #ff8a8a; }
+  </style>
+</head>
+<body>
+  <header class="nav"><div class="wrap"><a class="logo" href="./"><i></i>Formatly</a></div></header>
+  <main class="wrap doc">
+    <a class="back" href="./" style="padding-top:0">← Back to Formatly</a>
+    <h1>Contact us</h1>
+    <p>Payment taken but no access, a broken page, an idea: write here. We reply to the email you give, normally within one working day. Do not send card details. A Razorpay payment ID (starts with <code>pay_</code>) is enough for any payment question.</p>
+    <p id="mail"></p>
+    <label>Your email<input id="c-email" type="email" autocomplete="email"></label>
+    <label>Topic<select id="c-kind"><option value="payment">Payment or billing</option><option value="access">I cannot get in</option><option value="bug">Something is broken</option><option value="idea">Idea or request</option><option value="other">Other</option></select></label>
+    <label>Message<textarea id="c-msg" rows="6" maxlength="2000"></textarea></label>
+    <label>Razorpay payment ID (optional)<input id="c-pay" placeholder="pay_…"></label>
+    <p class="msg" id="msg"></p>
+    <button class="btn big" id="go">Send</button>
+    <script src="pay-config.js?v=12"></script>
+    <script>
+      const C = window.ABHICHAL || {};
+      if (C.supportEmail) document.getElementById("mail").innerHTML = "You can also write to <a href=\"mailto:" + C.supportEmail + "\">" + C.supportEmail + "</a>.";
+      const msg = document.getElementById("msg");
+      document.getElementById("go").onclick = async () => {
+        msg.className = "msg"; msg.textContent = "Sending…";
+        try {
+          const r = await fetch(C.api + "/api/contact", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: document.getElementById("c-email").value, kind: document.getElementById("c-kind").value, message: document.getElementById("c-msg").value, paymentId: document.getElementById("c-pay").value }) });
+          const j = await r.json().catch(() => ({}));
+          if (!r.ok) throw new Error(j.error || "Could not send. Please try again.");
+          msg.textContent = "Sent. Thank you, we will reply to your email.";
+          document.getElementById("c-msg").value = "";
+        } catch (e) { msg.className = "msg bad"; msg.textContent = e.message; }
+      };
+    </script>
+  </main>
+  <footer><div class="wrap"><div><a href="./">Formatly</a><a href="terms.html">Terms and refunds</a><a href="privacy.html">Privacy</a><a href="contact.html">Contact</a></div></div></footer>
+</body>
+</html>

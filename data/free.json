@@ -1,38 +1,108 @@
 {
-  "id": "baby",
-  "lasts": "A one-off baby clip stops getting views in about a week. The same face, voice, and room can keep going.",
-  "steps": [
-    "Make one baby face and save it. Do not start from a real child's photo.",
-    "Pick one room and keep it. A new set every episode looks like a new channel.",
-    "Write four lines only: a request, a pause, a complaint, a last line that flips the request.",
-    "Record those four lines in your own voice. Do not clone a real person's voice.",
-    "Turn the still into a talking clip. Caption every line in big type.",
-    "Turn on the synthetic-content label. The next episode uses the same baby and the same room."
-  ],
-  "shape": "Baby: you cut it?\nWorker: yes.\nBaby: why?\nWorker: the last line answers a different question than the one the baby asked.",
-  "stack": {
-    "Script": "ChatGPT, Gemini, or Claude",
-    "Face": "Any image generator that keeps a character consistent from a reference",
-    "Motion": "Veo 3.1, Kling 3.0, Hailuo 2.3, or Seedance 2.0. Pick one and check its free tier today",
-    "Voice": "Your own voice. If you use text-to-speech, use one whose licence allows monetised videos",
-    "Edit": "CapCut"
+ "id": "baby",
+ "title": "AI baby comedy: joke to Flow prompt",
+ "lasts": "A one-off baby clip stops getting views in about a week. The same baby, voice and kind of room can keep a channel going, as long as the joke changes every time.",
+ "stack": {
+  "Writer": "ChatGPT (or Cursor). Holds the master prompt. It writes the Flow prompt; you do not write prompts by hand.",
+  "Video": "Google Flow, Omni Flash (10 s clips, voices) or Veo 3.1 (8 s clips).",
+  "Face lock": "A text lock pasted into every clip, plus one baby image as a Flow ingredient if the face drifts.",
+  "Voice lock": "A voice sentence pasted into every clip. Optional saved voice in Flow (@Voice).",
+  "Join": "CapCut. Only needed when a joke is split into parts."
+ },
+ "setup": [
+  "Make the baby once. In Flow (or any image tool) generate one original baby on a plain light background, front and three-quarter view. Do not start from a real child's photo. Save it as an ingredient named Baby.",
+  "Write the baby's lock block (below) and never change a word of it. This is what keeps the same baby in every clip. The Flow ingredient is the second layer on top.",
+  "Optional voice lock: in Flow, Add Voices, Create New Voice, choose a base voice and describe it ('tiny sweet baby voice, clear, casual'). Name it. Flow Help says voice references work only with ingredient generations.",
+  "Create the prompt writer: make a ChatGPT project and paste the master prompt into its instructions. This is the only time you paste it."
+ ],
+ "locks": [
+  {
+   "label": "Character lock (the baby)",
+   "tool": "Already inside the master prompt. Keep your own copy.",
+   "text": "The main character is the same consistent 1-year-old baby used across all videos: fair skin, round chubby cheeks, expressive big dark eyes, tiny nose, soft black hair, realistic 1-year-old toddler proportions, and an adorable innocent face. Do not change the baby's face, hairstyle, body, skin tone, age, or identity."
   },
-  "prompts": [
-    {
-      "label": "1. Script prompt",
-      "tool": "Paste into ChatGPT, Gemini, or Claude",
-      "text": "You write short comedy scripts for an original AI baby character named [NAME]. Setting: [ROOM, e.g. a small kitchen]. The baby speaks like a tired [adult type, e.g. shopkeeper, electrician, schoolteacher].\n\nWrite [3] episodes. Each episode has exactly four lines:\n1. A request.\n2. A reply from the adult that misses the point.\n3. The baby's complaint.\n4. A last line that flips the request.\n\nLanguage: [Hinglish in Roman script / Hindi / English]. At most 14 words per line. No real people, no brand names, no jokes about a real child.\n\nOutput a table with columns: line number, speaker, spoken line, on-screen caption, a five-word shot note."
-    },
-    {
-      "label": "2. Character sheet prompt",
-      "tool": "Paste into your image generator",
-      "text": "Character sheet of one original fictional baby, about one year old, round face, [HAIR], wearing [OUTFIT, e.g. a yellow kurta]. Three views: front, three-quarter, side. Plain light grey background, soft studio light, the same face in all three views, clear eyes, no text, no logo. Soft 3D animation look. This is an invented character, not a real child."
-    },
-    {
-      "label": "3. Scene prompt",
-      "tool": "Paste into your video tool, with the character sheet as the reference image",
-      "text": "Static medium shot in [ROOM]. The baby [NAME] sits in [a high chair] and looks into the camera. The baby says: \"[LINE]\". Lips match the speech. A small head tilt on the last word. Soft daylight, no camera shake, 6 seconds. Keep the face identical to the reference image. No text on screen."
-    }
-  ],
-  "avoid": "A real child's face, a copied voice, or another channel's exact story. Change the joke, the room, and the voice in every episode so YouTube does not read the channel as templated."
+  {
+   "label": "Voice lock",
+   "tool": "Already inside the master prompt.",
+   "text": "The baby's voice is tiny, sweet, and clear. Keep delivery casual, not theatrical. Use perfectly synchronized mouth movements for every spoken word."
+  }
+ ],
+ "master": {
+  "label": "Master prompt",
+  "tool": "ChatGPT (project or Custom GPT) or a Cursor rule. Paste once.",
+  "text": "You are my Google Flow prompt writer for an AI baby comedy channel (Hindi jokes performed by babies).\n\nI send you one joke written as a short dialogue with speaker labels (for example Mummy, Baby, Vendor, Teacher), plus an outfit and a room. You return ready-to-paste Google Flow prompts, one per clip, then the post copy. Return only that: no introduction, no explanation, no questions. Separate clips with a line: ===== PART i OF n =====\n\n1) CLIP SIZE\n- Standalone-clip warning (first lines of every prompt): Generate a brand-new standalone video from scratch. Do NOT extend, continue, stitch, concatenate, remix or append any previous video. Do NOT use Add to scene or Extend. Output exactly ONE independent 10-second portrait 9:16 clip, never 20 or 30 seconds.\n- SPLITTING: speech runs at about 2.5 words per second. A clip holds at most 22 spoken words so the last word lands before the clip ends. If my input is longer, split it into n clips on a speaker turn, never in the middle of a line. Label each prompt PART i OF n OF THE SAME JOKE. Every part uses the same characters, room, clothes and camera. Never repeat a line from another part. The last beat (the punch) belongs only to the last part. Do not add jokes, lines or characters I did not give you.\n\n2) LOCKS. Paste these two blocks word for word into every prompt. Never paraphrase them.\n\nCHARACTER LOCK:\nThe main character is the same consistent 1-year-old baby used across all videos: fair skin, round chubby cheeks, expressive big dark eyes, tiny nose, soft black hair, realistic 1-year-old toddler proportions, and an adorable innocent face. Do not change the baby's face, hairstyle, body, skin tone, age, or identity.\n\nVOICE LOCK:\nThe baby's voice is tiny, sweet, and clear. Keep delivery casual, not theatrical. Use perfectly synchronized mouth movements for every spoken word.\n\n3) EVERY PROMPT CONTAINS THESE, IN THIS ORDER\na. The standalone-clip warning from section 1.\nb. One style line: Create an exactly 10-second ultra-realistic cinematic comedy video optimized for Google Flow, with natural facial animation, realistic toddler body movement, physically accurate lighting, high-detail textures, soft cinematic depth of field and smooth natural camera movement.\nc. The CHARACTER LOCK block.\nd. Frame rule: true portrait 9:16 (1080x1920). The picture must fill the entire frame edge to edge. No 16:9 landscape, no black bars, no letterbox, no pillarbox, no empty margins. Characters are big in frame; this is a phone Reel, not a small window in the middle of a phone.\ne. Wardrobe: 'For this video, dress the baby in [OUTFIT]. This exact outfit stays identical for the entire video.' Use the outfit I give you. If I give none, choose one and reuse it in every part.\nf. Scene: the room I give you, in 2 to 3 concrete sentences (light direction, three props). The same text in every part.\ng. FIRST 3 SECONDS: the clip STARTS already in the middle of the scene. No walk-in, no empty establishing wide, no silent pause, no logo. If the first beat is an Action line, play that silent action before anyone speaks. Never skip a gasp, a cry, a laugh or someone walking in if I wrote it.\nh. WHO SPEAKS: follow the speaker labels exactly. Different labels are different people. Never move a line onto another speaker. A character who only cries or reacts has no spoken line. If words alternate (A, B, A, B) every repeat is spoken. Keep every word, spelling and script of the dialogue exactly as I wrote it. Do not translate, transliterate or fix it. A line written as Action (no quotes) is silent and plays on screen at that moment.\ni. THE FACE: words in parentheses after a speaker name are played on that person while they say the line, not afterwards. Example: Boy (shy, eyes down) looks down and smiles as he speaks. Girl (arms crossed, grinning) is already grinning.\nj. Camera: a side three-quarter angle. The two speakers stand or sit facing each other (amne-samne), so neither looks into the lens. Hold a close three-quarter shot of the baby as the punch lands.\nk. Dialogue: 'Speak at a natural conversational pace. Use ONLY this dialogue, add no extra lines.' Then my lines, one per line, as SPEAKER (face): words.\nl. The VOICE LOCK block.\nm. Ending: Stop when this clip's last line is spoken. In a single-clip joke, or in the last part, after the punch play a short sitcom audience chuckle for about 1.5 seconds, then fade; do not drown the last word. In an earlier part, do not say the punch and add no laugh. Exactly 10 seconds total.\nn. No subtitles, no captions, no text overlays, no watermark, no logo, no song. No outfit change, no age change, no identity change, no extra fingers, no distorted faces, no flicker, no visual artifacts, no abrupt cuts.\n\n4) RULES FOR THIS FORMAT\n- If the source has babies as the speakers, make every speaker a baby (same style, different outfits). Do not turn one of them into an adult.\n- A silent child on screen may be teased or gently scolded as the joke needs, but a silent child does not speak. No slapping or hitting of a child, ever; restage it as a light playful beat. No second joke in the same clip.\n- Keep dialogue in Devanagari exactly as given. Do not change repeated words (for example if two words alternate, say every repeat).\n\n5) SAFETY REWRITE: Flow rejects some scenes (anyone hanging, falling from height, cutting through a wire, or any harm to a minor). If my input contains such a beat, keep the joke but restage it safely (a stumble instead of a fall, a mild scare instead of danger) and tell me in one line after the prompt.\n\n6) POST COPY, after the last prompt\nCAPTION: Hindi, 5 to 6 words, no hashtags in it.\nHASHTAGS: exactly 4.\nYT TITLE: one short Hindi title that does not give away the punch."
+ },
+ "input": {
+  "label": "What you send each time",
+  "tool": "ChatGPT, in the same project",
+  "text": "JOKE (speaker labels, exact words to be spoken):\n[Paste the joke. One line per speaker. Action lines without quotes are silent, for example: Action: Mummy lifts the lid.]\n\nOUTFIT: [For example: a yellow cotton kurta and tiny white pyjamas]\nROOM: [For example: a small kitchen, morning window light, steel tiffin on the counter]\nFIRST 3 SECONDS (optional): [What is already happening when the clip starts]"
+ },
+ "example": {
+  "input": "JOKE:\nMummy: बेटा, फ्रिज की मिठाई किसने खाई?\nBaby (innocent, eyes wide): बिल्ली ने।\nMummy: हमारी तो कोई बिल्ली ही नहीं है।\nBaby (calm, tiny shrug): तो फिर बहुत तेज़ भागी होगी।\n\nOUTFIT: a mustard cotton kurta and white pyjamas\nROOM: a small kitchen, soft morning window light, an open fridge, a steel plate on the counter",
+  "note": "That is about 24 words, so ChatGPT may split it into 2 parts on a speaker turn. Every part gets the same baby, kitchen, clothes and camera. The punch is only in the last part."
+ },
+ "loop": [
+  "Find a joke. Use public joke collections or ask ChatGPT for ten original jokes in the format you like, then pick the one that makes you laugh with the sound off. A good joke has two speakers and a last line that flips the first.",
+  "Label the speakers (Mummy, Baby, Vendor) and put the exact words on separate lines. Add (face) notes only where the face matters.",
+  "Send the input block to your ChatGPT project. It returns one Flow prompt per 10-second clip, plus caption and four hashtags.",
+  "In Flow, paste each prompt. Same ingredient, same model, 9:16. Make 2 or 3 takes and keep the best.",
+  "If the joke came back as PART 1 OF 2 and PART 2 OF 2, make both with the same outfit and room. Join them in CapCut in order and cut on the speech.",
+  "Post. YouTube Studio: set AI use to Yes, because the clip looks real. Instagram: add the AI label if you use it. Use the caption and hashtags ChatGPT gave you."
+ ],
+ "avoid": "Copying another creator's reel shot for shot. Keep the idea and the punch; change the characters, room, outfit and wording. YouTube asks that borrowed material is changed significantly, and a channel of near-identical clips can lose monetisation as inauthentic content.",
+ "policy": [
+  "YouTube lists videos 'where characters are put in the same situation over and over again with the same outcome' as not monetisable. Change the situation, the room and the joke shape between videos.",
+  "Realistic AI video must carry the YouTube AI-use disclosure. Disclosure alone does not limit reach or earning.",
+  "Flow rejects scenes with hanging, falling, cutting through wire or harm to a minor. The master rewrites those beats into safe versions."
+ ],
+ "sources": [
+  {
+   "t": "Google Flow Help: ingredients, voice references, best practices",
+   "u": "https://support.google.com/flow/answer/16353334"
+  },
+  {
+   "t": "Google: Veo 3.1 Ingredients to Video (vertical 9:16, identity consistency)",
+   "u": "https://blog.google/innovation-and-ai/technology/ai/veo-3-1-ingredients-to-video/"
+  },
+  {
+   "t": "Google Cloud: Ultimate prompting guide for Veo 3.1",
+   "u": "https://cloud.google.com/blog/products/ai-machine-learning/ultimate-prompting-guide-for-veo-3-1"
+  },
+  {
+   "t": "r/generativeAI: consistent character workflow, the 8-second rule",
+   "u": "https://www.reddit.com/r/generativeAI/comments/1rcfyuk/sharing_my_workflow_for_consistent_ai_characters/"
+  },
+  {
+   "t": "How to write Veo 3 prompts with a Custom GPT",
+   "u": "https://www.arsturn.com/blog/how-to-use-a-custom-gpt-to-write-perfect-veo-3-prompts"
+  },
+  {
+   "t": "Powtoon: Veo 3 prompt examples (dialogue format, no subtitles)",
+   "u": "https://www.powtoon.com/blog/veo-3-video-prompt-examples/"
+  },
+  {
+   "t": "YouTube: channel monetization policies (inauthentic and reused content)",
+   "u": "https://support.google.com/youtube/answer/1311392"
+  },
+  {
+   "t": "YouTube: disclosing use of generative AI content",
+   "u": "https://support.google.com/youtube/answer/14328491"
+  }
+ ],
+ "kind": "recipe",
+ "qc": [
+  "Face, hair and outfit match the previous episode.",
+  "Every line is spoken, by the right character, in the right order. No extra line was invented.",
+  "The last word is not covered by music or laughter.",
+  "Lips match the speech. No text, subtitles, logo or watermark on screen.",
+  "Hands: five fingers, nothing merged. If a take fails, regenerate; do not patch the prompt."
+ ],
+ "flow": [
+  "Open Google Flow, create a project, choose Video.",
+  "Model: Omni Flash for clips up to 10 seconds (it also accepts saved voices), or Veo 3.1 for clips up to 8 seconds. Whatever you pick, the clip length written in the master prompt must match it.",
+  "Aspect ratio 9:16. Generate 2 or 3 takes of the same prompt and keep the best one. Do not rewrite the prompt between takes unless a rule was broken.",
+  "Video Ingredients: add your character image(s) on a plain background. Type @ in the prompt box to pick them by name. Flow Help says to use the same images clip after clip, and to keep ingredient images clean (one subject, plain background).",
+  "Voices (Omni Flash): Add Voices, pick or create a voice, then type @Voice: name in the prompt. Flow Help: voice references work only on generations that use ingredients.",
+  "Paste the prompt ChatGPT returned. Do not edit the locked blocks."
+ ]
 }
