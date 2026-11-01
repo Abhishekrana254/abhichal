@@ -1,6 +1,4 @@
-const KEY = "abhichal-paid";
 const LOG = "abhichal-hisab";
-const paid = () => localStorage.getItem(KEY) === "1";
 
 function views(n) {
   return new Intl.NumberFormat("en-US").format(n);
@@ -16,32 +14,51 @@ function esc(s) {
 
 let filter = "all";
 
-function card(n, base) {
-  const pills = [
+function pills(n) {
+  return [
     n.yt ? '<span class="pill yt">YouTube</span>' : "",
     n.ig ? '<span class="pill ig">Instagram</span>' : ""
   ].join("");
+}
+
+function card(n, base) {
   const yt = n.rpm
     ? `${money(base / 1000 * n.rpm[0])}–${money(base / 1000 * n.rpm[1])}`
     : "No RPM band";
-  const ig = n.ig ? "Reach, not a rate" : "Weak fit";
+  return `<button type="button" class="niche" data-id="${esc(n.id)}">${pills(n)}<h2>${esc(n.name)}</h2><p class="about">${esc(n.about)}</p><div class="money"><div><span>YouTube / 500k views</span><strong>${yt}</strong></div><div><span>Instagram</span><strong>Same video, as a Reel</strong></div></div><div class="open-label">How to make it</div></button>`;
+}
+
+function lesson(n, base) {
+  const yt = n.rpm
+    ? `${money(base / 1000 * n.rpm[0])}–${money(base / 1000 * n.rpm[1])} at 500k views`
+    : "No RPM band";
   const link = n.example
     ? `<a class="ex" href="${esc(n.example.url)}">${esc(n.example.title)} · ${views(n.example.views)} views</a>`
     : "";
-  const reel = n.reel ? `<div class="reel">Reel says ${esc(n.reel)}</div>` : "";
-  return `<article class="niche">${pills}<h2>${esc(n.name)}</h2><p class="about">${esc(n.about)}</p>${link}${reel}<div class="money"><div><span>YouTube / 500k views</span><strong>${yt}</strong></div><div><span>Instagram</span><strong>${ig}</strong></div></div></article>`;
+  const steps = n.steps.map((s) => `<li>${esc(s)}</li>`).join("");
+  return `<article class="lesson"><button type="button" class="back" id="back">All AI formats</button>${pills(n)}<h2>${esc(n.name)}</h2><p class="about">${esc(n.about)}</p><div class="facts"><div><span>Length</span>${esc(n.length)}</div><div><span>How long it lasts</span>${esc(n.lasts)}</div><div><span>YouTube estimate</span>${yt}</div></div>${link}<h3>How to make it</h3><ol>${steps}</ol><h3>The shape of the script</h3><div class="shape">${esc(n.shape)}</div><h3>Tools</h3><p>${esc(n.tools)}</p><h3>Leave out</h3><p>${esc(n.avoid)}</p><p class="small">Instagram pays this as reach, not a per-view rate. Post the same video as a Reel.</p></article>`;
 }
 
 function render(doc) {
   const base = doc.assumptionViews;
   document.getElementById("source").textContent = doc.source;
+  const openId = location.hash.slice(1);
+  const open = doc.niches.find((n) => n.id === openId);
+  const list = document.getElementById("list");
+  document.querySelector(".filters").hidden = Boolean(open);
+  if (open) {
+    list.className = "";
+    list.innerHTML = lesson(open, base);
+    document.getElementById("back").onclick = () => { location.hash = ""; };
+    window.scrollTo(0, 0);
+    return;
+  }
   const items = doc.niches.filter((n) => filter === "all" || (filter === "youtube" ? n.yt : n.ig));
-  document.getElementById("list").innerHTML = items.map((n) => card(n, base)).join("");
-}
-
-function unlock() {
-  localStorage.setItem(KEY, "1");
-  if (window.NICHES) render(window.NICHES);
+  list.className = "grid";
+  list.innerHTML = items.map((n) => card(n, base)).join("");
+  list.querySelectorAll(".niche").forEach((btn) => {
+    btn.onclick = () => { location.hash = btn.dataset.id; };
+  });
 }
 
 document.querySelectorAll(".filters button").forEach((btn) => {
@@ -52,32 +69,9 @@ document.querySelectorAll(".filters button").forEach((btn) => {
   };
 });
 
-document.getElementById("buy").onclick = async () => {
-  if (paid()) return;
-  const cfg = window.ABHICHAL || {};
-  if (!cfg.razorpayKey) {
-    alert("Payment key is missing.");
-    return;
-  }
-  if (!window.Razorpay) {
-    await new Promise((resolve, reject) => {
-      const s = document.createElement("script");
-      s.src = "https://checkout.razorpay.com/v1/checkout.js";
-      s.onload = resolve;
-      s.onerror = reject;
-      document.head.appendChild(s);
-    });
-  }
-  const rzp = new Razorpay({
-    key: cfg.razorpayKey,
-    amount: cfg.amountPaise,
-    currency: "INR",
-    name: "Formatly",
-    description: cfg.packName,
-    handler() { unlock(); }
-  });
-  rzp.open();
-};
+window.addEventListener("hashchange", () => {
+  if (window.NICHES) render(window.NICHES);
+});
 
 function rows() {
   try { return JSON.parse(localStorage.getItem(LOG) || "[]"); } catch { return []; }
@@ -108,7 +102,7 @@ document.getElementById("save").onclick = () => {
   paintLog();
 };
 
-fetch("./data/niches.json?v=8")
+fetch("./data/niches.json?v=9")
   .then((r) => r.json())
   .then((doc) => {
     window.NICHES = doc;
