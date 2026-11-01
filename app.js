@@ -781,10 +781,10 @@ document.addEventListener("click", (e) => {
 window.addEventListener("hashchange", route);
 
 Promise.all([
-  fetch("./data/catalog.json?v=14").then((r) => r.json()),
-  fetch("./data/live.json?v=14").then((r) => (r.ok ? r.json() : { niches: {} })).catch(() => ({ niches: {} })),
-  fetch("./data/radar.json?v=14").then((r) => (r.ok ? r.json() : { items: [] })).catch(() => ({ items: [] })),
-  fetch("./data/free.json?v=14").then((r) => r.json())
+  fetch("./data/catalog.json?v=15").then((r) => r.json()),
+  fetch("./data/live.json?v=15").then((r) => (r.ok ? r.json() : { niches: {} })).catch(() => ({ niches: {} })),
+  fetch("./data/radar.json?v=15").then((r) => (r.ok ? r.json() : { items: [] })).catch(() => ({ items: [] })),
+  fetch("./data/free.json?v=15").then((r) => r.json())
 ]).then(([cat, live, radar, free]) => {
   CAT = cat; LIVE = live; RADAR = radar; FREE = free;
   return refreshMe();

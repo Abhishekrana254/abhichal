@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#09090b" />
   <title>Contact · Formatly</title>
-  <link rel="stylesheet" href="style.css?v=14" />
+  <link rel="stylesheet" href="style.css?v=15" />
   <style>
     .doc { max-width: 720px; padding: 40px 0 20px; }
     .doc h1 { font-size: 44px; margin: 10px 0 18px; }
@@ -23,14 +23,14 @@
     <a class="back" href="./" style="padding-top:0">← Back to Formatly</a>
     <h1>Contact us</h1>
     <p>Payment taken but no access, a broken page, an idea: write here. We reply to the email you give, normally within one working day. Do not send card details. A Razorpay payment ID (starts with <code>pay_</code>) is enough for any payment question.</p>
-    <p id="mail"></p>
+    <p id="mail">You can also write to <a href="mailto:abhishekrana254@gmail.com">abhishekrana254@gmail.com</a>.</p>
     <label>Your email<input id="c-email" type="email" autocomplete="email"></label>
     <label>Topic<select id="c-kind"><option value="payment">Payment or billing</option><option value="access">I cannot get in</option><option value="bug">Something is broken</option><option value="idea">Idea or request</option><option value="other">Other</option></select></label>
     <label>Message<textarea id="c-msg" rows="6" maxlength="2000"></textarea></label>
     <label>Razorpay payment ID (optional)<input id="c-pay" placeholder="pay_…"></label>
     <p class="msg" id="msg"></p>
     <button class="btn big" id="go">Send</button>
-    <script src="pay-config.js?v=14"></script>
+    <script src="pay-config.js?v=15"></script>
     <script>
       const C = window.ABHICHAL || {};
       if (C.supportEmail) document.getElementById("mail").innerHTML = "You can also write to <a href=\"mailto:" + C.supportEmail + "\">" + C.supportEmail + "</a>.";
