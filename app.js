@@ -102,7 +102,7 @@ document.getElementById("save").onclick = () => {
   paintLog();
 };
 
-fetch("./data/niches.json?v=9")
+fetch("./data/niches.json?v=10")
   .then((r) => r.json())
   .then((doc) => {
     window.NICHES = doc;

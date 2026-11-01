@@ -10,7 +10,7 @@
       "ig": true,
       "rpm": [0.5, 2],
       "about": "One baby, an adult voice, a four-line joke. The face stays the same.",
-      "lasts": "A random baby dies in about a week. The same face, voice, and room can keep going.",
+      "lasts": "A one-off baby stops getting views in about a week. The same face, voice, and room can keep going.",
       "length": "20 to 35 seconds.",
       "example": {"title": "Cute AI Baby Funny Videos", "url": "https://www.youtube.com/watch?v=cQHmix8tknA", "views": 864159},
       "steps": [
