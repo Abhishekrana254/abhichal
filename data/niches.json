@@ -1,0 +1,31 @@
+{
+  "updated": "2026-11-01",
+  "assumptionViews": 500000,
+  "source": "YouTube dollar ranges use published RPM bands for that kind of video, applied to 500,000 views in a month. The reel's $/mo figures are Ahmad Salihu's estimates, same formula, not a payout we measured. Instagram has no public per-view rate in India.",
+  "niches": [
+    {"id": "city-docs", "name": "City docs", "yt": true, "ig": true, "reel": "$6.3K/mo", "rpm": [2, 6], "about": "Why a city was built this way. Maps, satellite shots, voiceover.", "example": null},
+    {"id": "car-hacks", "name": "Car hacks", "yt": true, "ig": true, "reel": "$2.6K/mo", "rpm": [5, 13], "about": "One repair or buying mistake, shown with stock footage and callouts.", "example": null},
+    {"id": "camc", "name": "C.A.M.C", "yt": true, "ig": true, "reel": "$3.8K/mo", "rpm": null, "about": "Printed this way on the reel. The card does not spell out the initials.", "example": null},
+    {"id": "udc", "name": "U.D.C", "yt": true, "ig": false, "reel": "$3.3K/mo", "rpm": null, "about": "Printed this way on the reel. The card does not spell out the initials.", "example": null},
+    {"id": "survival", "name": "Survival gear", "yt": true, "ig": true, "reel": "$2.2K/mo", "rpm": [4, 11], "about": "Which piece of gear is worth buying, and which is hype.", "example": null},
+    {"id": "jets", "name": "Jet explainers", "yt": true, "ig": false, "reel": "$400/mo", "rpm": [2, 6], "about": "How one machine works, in animation. Small audience, so the reel's number is low.", "example": null},
+    {"id": "workouts", "name": "Animated workouts", "yt": true, "ig": true, "reel": "$3K/mo", "rpm": [2, 5], "about": "A workout drawn or animated, no face, counted reps on screen.", "example": null},
+    {"id": "mma", "name": "MMA breakdowns", "yt": true, "ig": true, "reel": "$3.5K/mo", "rpm": [1.5, 4], "about": "One fight, paused, with the move explained. Footage has to be yours or licensed.", "example": null},
+    {"id": "tutorials", "name": "Tutorials", "yt": true, "ig": true, "reel": "$1K/mo", "rpm": [2, 8], "about": "Screen recording of one job, start to finish. The word is too broad to be one niche.", "example": null},
+    {"id": "stick", "name": "Stick figures", "yt": true, "ig": true, "reel": "$1K/mo", "rpm": [2, 5], "about": "A stick figure walks through one life skill. His other post used a $3.50 RPM on a much bigger channel.", "example": null},
+    {"id": "meat", "name": "Meat", "yt": true, "ig": true, "reel": "$5K/mo", "rpm": [1.5, 4], "about": "Close-up cooking. Cuts, heat, the finished plate. No talking needed.", "example": null},
+    {"id": "garden", "name": "Garden", "yt": true, "ig": true, "reel": "$2K/mo", "rpm": [1.5, 4], "about": "One plant, one problem, a fix. Hands in frame, face optional.", "example": null},
+    {"id": "defense", "name": "Self-defense", "yt": true, "ig": true, "reel": "$1K/mo", "rpm": [1.5, 4], "about": "One situation, three moves. Easy to copy, so the feed is crowded.", "example": null},
+    {"id": "celebs", "name": "Celebrities", "yt": true, "ig": true, "reel": "$10K/mo", "rpm": [2, 5], "about": "A career or a news week, told with photos and a voice. Rights are the hard part.", "example": null},
+    {"id": "love", "name": "AI love story", "yt": true, "ig": true, "reel": null, "rpm": [1, 3], "about": "A short romance with an AI look and a last-scene turn.", "example": {"title": "Obsession, Love or Passion", "url": "https://www.youtube.com/watch?v=_IYriJMlm9k", "views": 8384281}},
+    {"id": "real-or-ai", "name": "Real or AI", "yt": true, "ig": true, "reel": null, "rpm": [1, 3], "about": "The viewer has to guess which clip is generated.", "example": {"title": "Is This REAL or AI?", "url": "https://www.youtube.com/watch?v=C_m7lgvJ0tg", "views": 9318226}},
+    {"id": "baby", "name": "AI baby comedy", "yt": true, "ig": true, "reel": null, "rpm": [0.5, 2], "about": "One baby, an adult voice, a 30-second joke. Same face every episode.", "example": {"title": "Cute AI Baby Funny Videos", "url": "https://www.youtube.com/watch?v=cQHmix8tknA", "views": 864159}},
+    {"id": "mahabharat", "name": "AI mythology", "yt": true, "ig": true, "reel": null, "rpm": [1, 3], "about": "One scene from a known story, same art style across episodes.", "example": {"title": "Mahabharat AI remake, episode 1", "url": "https://www.youtube.com/watch?v=suJ3WTrGiIA", "views": 667252}},
+    {"id": "horror", "name": "Horror episodes", "yt": true, "ig": true, "reel": null, "rpm": [1, 3], "about": "Numbered episodes. A normal start, one wrong detail, a last line.", "example": {"title": "Drinking Tea at 1:30 AM", "url": "https://www.youtube.com/watch?v=ucutNzZrL0M", "views": 36485}},
+    {"id": "dance", "name": "Character dance", "yt": true, "ig": true, "reel": null, "rpm": [0.5, 2], "about": "A still you made, placed on a dance you can use. Same character next time.", "example": {"title": "Vegetable babies dance", "url": "https://www.youtube.com/watch?v=yn0ajLrU314", "views": 622380}},
+    {"id": "finance", "name": "Money explainers", "yt": true, "ig": true, "reel": null, "rpm": [6, 20], "about": "One money idea, whiteboard or stick figures. Highest YouTube RPM band on this page.", "example": null},
+    {"id": "true-crime", "name": "Case summaries", "yt": true, "ig": true, "reel": null, "rpm": [3, 8], "about": "One case, narrated. Ads are often limited, so the RPM band is uneven.", "example": null},
+    {"id": "street", "name": "One question, three people", "yt": false, "ig": true, "reel": null, "rpm": null, "about": "Instagram format. Ask one question on the street. The third answer is the one people stay for.", "example": null},
+    {"id": "grwm", "name": "Get ready with me", "yt": false, "ig": true, "reel": null, "rpm": null, "about": "Instagram format. 0% to 100% on screen. Crowded since October 2026.", "example": null}
+  ]
+}

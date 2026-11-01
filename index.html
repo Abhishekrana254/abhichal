@@ -3,31 +3,45 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#0c0c10" />
-  <meta name="description" content="Which short-video formats are getting views this week, and how to make one." />
+  <meta name="theme-color" content="#f4f1ea" />
+  <meta name="description" content="YouTube and Instagram niches, with the same earnings math as a faceless-niche reel." />
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="icons/icon-192.png" />
   <link rel="apple-touch-icon" href="icons/icon-512.png" />
   <title>Formatly</title>
-  <link rel="stylesheet" href="style.css?v=7" />
+  <link rel="stylesheet" href="style.css?v=8" />
 </head>
 <body>
-  <div class="kicker">Updated <span id="updated">31 Oct 2026</span></div>
-  <h1>Formatly</h1>
-  <p class="sub">What is showing up on recent shorts. The names below come from the videos, not from a list someone typed.</p>
-  <section class="card gap">
-    <h2>How the list is made</h2>
-    <ol>
-      <li>Ask YouTube what it suggests after the letters "ai a" through "ai z". No format name is typed.</li>
-      <li>Drop tutorials, tools, and "how to" phrases.</li>
-      <li>Rank what's left by the top video's views.</li>
-    </ol>
-    <p>Next scan the suggestions can change. A recipe is added only when the suggestion matches a format we already know how to shoot.</p>
+  <header class="top">
+    <div>
+      <div class="kicker">1 Nov 2026 · YouTube and Instagram</div>
+      <h1>Formatly</h1>
+    </div>
+    <p class="sub">The niches a faceless channel can post, on both apps. The dollar line is views times a rate, not a bank receipt.</p>
+  </header>
+  <section class="formula">
+    <div>
+      <b>His math</b>
+      <p>Monthly views ÷ 1,000 × an assumed RPM. The reel’s $6.3K is that guess for one example.</p>
+    </div>
+    <div>
+      <b>Our YouTube line</b>
+      <p>Same math at 500,000 views, using a published RPM band for that niche.</p>
+    </div>
+    <div>
+      <b>Instagram</b>
+      <p>No public per-view rate in India. A Reel is reach. Money is a brand or your own ₹149.</p>
+    </div>
   </section>
-  <div id="list"></div>
+  <div class="filters">
+    <button type="button" class="on" data-filter="all">Both</button>
+    <button type="button" data-filter="youtube">YouTube</button>
+    <button type="button" data-filter="instagram">Instagram</button>
+  </div>
+  <div class="grid" id="list"></div>
   <section class="hisab" id="hisab">
     <h2>Ledger</h2>
-    <p class="meta">Each day, type ad spend, visits, and how many people paid ₹149. Scale only if this stays at 100% or more.</p>
+    <p class="small">Type today’s ad spend, visits, and ₹149 purchases. Scale only if this stays at 100% or more.</p>
     <label>Ad spend today ₹ <input id="spend" inputmode="numeric" placeholder="100" /></label>
     <label>Visits <input id="visits" inputmode="numeric" placeholder="0" /></label>
     <label>Purchases <input id="buys" inputmode="numeric" placeholder="0" /></label>
@@ -38,11 +52,11 @@
   <p class="small" id="source"></p>
   <div class="bar">
     <div class="inner">
-      <button id="buy" class="buy" type="button">Other 4 recipes ₹149</button>
+      <button id="buy" class="buy" type="button">Shoot notes for the AI formats ₹149</button>
     </div>
   </div>
-  <script src="pay-config.js?v=7"></script>
-  <script src="app.js?v=7"></script>
+  <script src="pay-config.js?v=8"></script>
+  <script src="app.js?v=8"></script>
   <script>
     if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
   </script>

@@ -6,45 +6,51 @@ function views(n) {
   return new Intl.NumberFormat("en-US").format(n);
 }
 
+function money(n) {
+  return "$" + new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(n);
+}
+
 function esc(s) {
   return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
 
-function card(t) {
-  const open = t.free || paid();
-  const head = `<span class="tag">${esc(t.rank)}</span> <span class="tag dim">${views(t.signal_views)} views</span>`;
-  const body = `<h2>${esc(t.title)}</h2>
-    <p class="meta">${t.videos > 1 ? t.videos + " videos" : "One video"} · ${esc(t.signal_title)}</p>
-    <p>${esc(t.what)}</p>
-    <p class="meta">${esc(t.lasts || "")}</p>`;
-  if (!t.make || !t.make.length) {
-    return `<article class="card">${head}${body}<p class="meta">No recipe yet. The phrase is on the list because the search found it.</p></article>`;
-  }
-  if (!open) {
-    return `<article class="locked">${head}${body}<p>Recipe is in the ₹149 pack.</p></article>`;
-  }
-  return `<article class="card">${head}${body}
-    <p><b>How to make it</b></p>
-    <ol>${t.make.map((s) => `<li>${esc(s)}</li>`).join("")}</ol>
-    <p><b>Tools.</b> ${esc(t.tools)}</p>
-    <p class="meta">Skip: ${esc(t.avoid)}</p>
-  </article>`;
+let filter = "all";
+
+function card(n, base) {
+  const pills = [
+    n.yt ? '<span class="pill yt">YouTube</span>' : "",
+    n.ig ? '<span class="pill ig">Instagram</span>' : ""
+  ].join("");
+  const yt = n.rpm
+    ? `${money(base / 1000 * n.rpm[0])}–${money(base / 1000 * n.rpm[1])}`
+    : "No RPM band";
+  const ig = n.ig ? "Reach, not a rate" : "Weak fit";
+  const link = n.example
+    ? `<a class="ex" href="${esc(n.example.url)}">${esc(n.example.title)} · ${views(n.example.views)} views</a>`
+    : "";
+  const reel = n.reel ? `<div class="reel">Reel says ${esc(n.reel)}</div>` : "";
+  return `<article class="niche">${pills}<h2>${esc(n.name)}</h2><p class="about">${esc(n.about)}</p>${link}${reel}<div class="money"><div><span>YouTube / 500k views</span><strong>${yt}</strong></div><div><span>Instagram</span><strong>${ig}</strong></div></div></article>`;
 }
 
 function render(doc) {
-  document.getElementById("updated").textContent = doc.updated;
+  const base = doc.assumptionViews;
   document.getElementById("source").textContent = doc.source;
-  document.getElementById("list").innerHTML = doc.formats.map(card).join("");
-  const buy = document.getElementById("buy");
-  const locked = doc.formats.some((t) => t.make && t.make.length && !t.free && !paid());
-  if (paid()) buy.textContent = "Pack is open";
-  else if (!locked) buy.textContent = "No extra recipe in this scan";
+  const items = doc.niches.filter((n) => filter === "all" || (filter === "youtube" ? n.yt : n.ig));
+  document.getElementById("list").innerHTML = items.map((n) => card(n, base)).join("");
 }
 
 function unlock() {
   localStorage.setItem(KEY, "1");
-  if (window.FORMATS) render(window.FORMATS);
+  if (window.NICHES) render(window.NICHES);
 }
+
+document.querySelectorAll(".filters button").forEach((btn) => {
+  btn.onclick = () => {
+    filter = btn.dataset.filter;
+    document.querySelectorAll(".filters button").forEach((b) => b.classList.toggle("on", b === btn));
+    if (window.NICHES) render(window.NICHES);
+  };
+});
 
 document.getElementById("buy").onclick = async () => {
   if (paid()) return;
@@ -102,13 +108,13 @@ document.getElementById("save").onclick = () => {
   paintLog();
 };
 
-fetch("./data/formats.json?v=7")
+fetch("./data/niches.json?v=8")
   .then((r) => r.json())
   .then((doc) => {
-    window.FORMATS = doc;
+    window.NICHES = doc;
     render(doc);
   })
   .catch(() => {
-    document.getElementById("list").innerHTML = "<p>Could not load the format list.</p>";
+    document.getElementById("list").innerHTML = "<p>Could not load the niche list.</p>";
   });
 paintLog();
