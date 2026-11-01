@@ -139,13 +139,15 @@ function loadGsi() {
     document.head.appendChild(s);
   });
 }
-async function acceptGoogle(d, credential) {
-  say(d, "Signing in with Google…");
-  const r = await api("/api/google", { method: "POST", body: JSON.stringify({ credential }) });
+async function enter(d, r) {
   store.set(TOKEN_KEY, r.token);
   await refreshMe(); paintChip(); route();
   if (paid()) { closeModal(); return; }
   if (d && d.dataset && d.dataset.then === "buy") buyModal(true); else closeModal();
+}
+async function acceptGoogle(d, credential) {
+  say(d, "Signing in with Google…");
+  await enter(d, await api("/api/auth", { method: "POST", body: JSON.stringify({ mode: "google", credential }) }));
 }
 function mountGoogle(d) {
   const slot = $(".gbtn", d);
@@ -203,21 +205,41 @@ async function finishPayment(resp) {
     const r = await api("/api/verify", { method: "POST", body: JSON.stringify({ razorpay_payment_id: resp.razorpay_payment_id, razorpay_subscription_id: resp.razorpay_subscription_id, razorpay_signature: resp.razorpay_signature }) });
     store.set(TOKEN_KEY, r.token);
     await refreshMe(); paintChip();
-    modal(`<h3>You are in. Welcome to Pro.</h3><p class="sub">Every lesson is open now. Next time, press Sign in and Continue with Google using <b>${esc(ME ? ME.email : "")}</b>.</p><button class="btn big" data-close>Open my lessons</button>`);
+    modal(`<h3>You are in. Welcome to Pro.</h3><p class="sub">Every lesson is open now. Next time, press Sign in with <b>${esc(ME ? ME.email : "")}</b>.</p><button class="btn big" data-close>Open my lessons</button>`);
     route();
   } catch (e) {
-    modal(`<h3>Payment received, access is pending</h3><p class="sub">${esc(e.message)}</p><p class="sub">Your payment ID: <code>${esc(resp.razorpay_payment_id || "")}</code>. Keep it. Sign in again with Google in a minute, or contact us and we will fix it the same day.</p><div class="row"><button class="btn" data-restore>Sign in</button><button class="btn ghost" data-contact>Contact us</button></div>`);
+    modal(`<h3>Payment received, access is pending</h3><p class="sub">${esc(e.message)}</p><p class="sub">Your payment ID: <code>${esc(resp.razorpay_payment_id || "")}</code>. Keep it. Sign in again in a minute, or contact us and we will fix it the same day.</p><div class="row"><button class="btn" data-restore>Sign in</button><button class="btn ghost" data-contact>Contact us</button></div>`);
   }
 }
-function signInModal(then) {
-  modal(`<h3>Sign in or sign up</h3>
-    <p class="sub" style="margin-top:0">${then === "buy" ? "Continue with Google to unlock Pro. " : ""}New here? The same button creates your account. We only get your name and email.</p>
+function signInModal(then, mode) {
+  const up = mode === "signup";
+  modal(`<h3>${up ? "Create your account" : "Sign in"}</h3>
+    <p class="sub" style="margin-top:0">${then === "buy" ? "Sign in to unlock Pro. " : ""}${up ? "Already have an account?" : "New here?"} <button class="link" id="s-flip">${up ? "Sign in" : "Create an account"}</button></p>
     <div class="gbtn"></div>
+    <p class="fine" style="text-align:center;margin:10px 0">or use your email</p>
+    ${up ? '<label>Name (optional)<input id="s-name" type="text" autocomplete="name" maxlength="60"></label>' : ""}
+    <label>Email<input id="s-email" type="email" autocomplete="email" placeholder="you@example.com"></label>
+    <label>Password<input id="s-pw" type="password" autocomplete="${up ? "new-password" : "current-password"}" placeholder="${up ? "At least 8 characters" : "Your password"}"></label>
     <p class="msg"></p>
-    <p class="fine">By continuing you agree to the <a href="terms.html" target="_blank" rel="noopener">terms</a> and <a href="privacy.html" target="_blank" rel="noopener">privacy policy</a>.</p>`, (d) => {
+    <button class="btn big" id="s-go">${up ? "Create account" : "Sign in"}</button>
+    <p class="fine">${up ? "" : 'Forgot your password? Continue with Google, or write to ' + esc(CFG.supportEmail || "us") + ". "}By continuing you agree to the <a href="terms.html" target="_blank" rel="noopener">terms</a> and <a href="privacy.html" target="_blank" rel="noopener">privacy policy</a>.</p>`, (d) => {
     if (then) d.dataset.then = then;
     mountGoogle(d);
-    setTimeout(() => { if (!window.google || !$(".gbtn iframe, .gbtn div", d)) say(d, "Google sign-in could not load. Check your connection, or write to " + (CFG.supportEmail || "us") + ".", true); }, 6000);
+    fld(d, "s-flip").onclick = () => signInModal(then, up ? "login" : "signup");
+    const go = async () => {
+      const email = fld(d, "s-email").value.trim(), password = fld(d, "s-pw").value;
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return say(d, "Enter a valid email address.", true);
+      if (!password) return say(d, "Enter your password.", true);
+      if (up && password.length < 8) return say(d, "Use at least 8 characters.", true);
+      fld(d, "s-go").disabled = true; say(d, up ? "Creating your account…" : "Signing in…");
+      try {
+        const nm = fld(d, "s-name");
+        await enter(d, await api("/api/auth", { method: "POST", body: JSON.stringify({ mode: up ? "signup" : "login", email, password, name: nm ? nm.value : "" }) }));
+        if (!up) track("restore_ok");
+      } catch (e) { fld(d, "s-go").disabled = false; say(d, e.message, true); }
+    };
+    fld(d, "s-go").onclick = go;
+    fld(d, "s-pw").addEventListener("keydown", (e) => { if (e.key === "Enter") go(); });
   });
 }
 const restoreModal = () => signInModal();
@@ -233,7 +255,7 @@ function accountModal() {
       <button class="btn ghost" id="a-out">Sign out</button>
     </div>
     <p class="msg"></p>
-    <p class="fine">On another phone or computer, press Sign in and Continue with Google with this email.</p>`, (d) => {
+    <p class="fine">On another phone or computer, press Sign in with this email.</p>`, (d) => {
     fld(d, "a-out").onclick = signOut;
     const c = fld(d, "a-cancel");
     if (c) c.onclick = async () => {
@@ -570,8 +592,8 @@ function homeHTML() {
       <details><summary>Will I get these views?</summary><p>No promise. A top video this week shows what an audience is watching. It does not say what a new channel will get.</p></details>
       <details><summary>Does Pro renew by itself? How do I cancel?</summary><p>Yes. Pro is ₹149 a month and renews on its own through Razorpay (UPI AutoPay or card). Open Account, press Cancel renewal, and the next charge does not happen. The month you already paid for is not refunded. You keep access until that month ends. Razorpay may ask you to approve the mandate in your UPI app the first time.</p></details>
       <details><summary>Can I get a refund?</summary><p>No. Cancel stops future charges only. The ₹149 already taken stays, and access stays until that month ends.</p></details>
-      <details><summary>How do I sign in on another phone or computer?</summary><p>Press Sign in and choose Continue with Google, using the same Google account you paid with. That is all.</p></details>
-      <details><summary>I paid but I have no access</summary><p>Press Sign in and continue with the same Google account you paid with. If that still fails, use Contact us at the bottom of the page and include the payment ID from your receipt. We fix it the same day.</p></details>
+      <details><summary>How do I sign in on another phone or computer?</summary><p>Press Sign in and use the same Google account, or the same email and password, that you paid with.</p></details>
+      <details><summary>I paid but I have no access</summary><p>Press Sign in and use the same Google account, or the same email and password, that you paid with. If that still fails, use Contact us at the bottom of the page and include the payment ID from your receipt. We fix it the same day.</p></details>
       <details><summary>What do you store about me?</summary><p>Your email, name and the phone number Razorpay shares, your subscription status, and anonymous page counts. No card or UPI details ever reach us. See the <a href="privacy.html">privacy policy</a>.</p></details>
       <details><summary>Do I have to mark AI videos?</summary><p>YouTube has a setting to disclose realistic altered or synthetic content. Turn it on. Every recipe says so, and every recipe uses original characters, not real people.</p></details>
     </div>
@@ -637,7 +659,7 @@ function lockedLesson(n, why) {
   return `<div class="cols locked">
       <div class="panel ghost"><h3>How to make it</h3><ol class="steps">${Array.from({ length: 6 }, () => "<li>Placeholder line that stays hidden until you are a Pro member, six steps in all.</li>").join("")}</ol></div>
       <div class="panel ghost"><h3>Master prompt</h3><div class="prompt"><header><b>1. Master prompt</b></header><pre>Placeholder text that stays hidden until you are a Pro member. The real prompt is not in this page.</pre></div><div class="prompt"><pre>Placeholder text.</pre></div></div>
-      <div class="gate"><div class="gate-box"><span class="badge b-F">Pro</span><b>${isRecipe ? "Full recipe, master prompt and locks" : "Full playbook and master prompt"}</b><p>${why ? esc(why) + " " : ""}The ChatGPT master prompt, the character and voice locks, the Flow settings, the checklist and the sources for ${esc(n.name)}. ₹${PRICE} a month, cancel anytime.</p><button class="btn big" data-buy>Unlock · ₹${PRICE}/month</button><button class="link" data-restore>Sign in or sign up</button></div></div>
+      <div class="gate"><div class="gate-box"><span class="badge b-F">Pro</span><b>${isRecipe ? "Full recipe, master prompt and locks" : "Full playbook and master prompt"}</b><p>${why ? esc(why) + " " : ""}The ChatGPT master prompt, the character and voice locks, the Flow settings, the checklist and the sources for ${esc(n.name)}. ₹${PRICE} a month, cancel anytime.</p><button class="btn big" data-buy>Unlock · ₹${PRICE}/month</button><button class="link" data-restore>Sign in or create an account</button></div></div>
     </div>`;
 }
 async function hydrateLesson(n) {
@@ -750,10 +772,10 @@ document.addEventListener("click", (e) => {
 window.addEventListener("hashchange", route);
 
 Promise.all([
-  fetch("./data/catalog.json?v=16").then((r) => r.json()),
-  fetch("./data/live.json?v=16").then((r) => (r.ok ? r.json() : { niches: {} })).catch(() => ({ niches: {} })),
-  fetch("./data/radar.json?v=16").then((r) => (r.ok ? r.json() : { items: [] })).catch(() => ({ items: [] })),
-  fetch("./data/free.json?v=16").then((r) => r.json())
+  fetch("./data/catalog.json?v=17").then((r) => r.json()),
+  fetch("./data/live.json?v=17").then((r) => (r.ok ? r.json() : { niches: {} })).catch(() => ({ niches: {} })),
+  fetch("./data/radar.json?v=17").then((r) => (r.ok ? r.json() : { items: [] })).catch(() => ({ items: [] })),
+  fetch("./data/free.json?v=17").then((r) => r.json())
 ]).then(([cat, live, radar, free]) => {
   CAT = cat; LIVE = live; RADAR = radar; FREE = free;
   return refreshMe();
