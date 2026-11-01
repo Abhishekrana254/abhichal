@@ -276,5 +276,6 @@ footer a { color: #c9c9d1; margin-right: 16px; }
 .example p { margin: 0; color: var(--muted); font-size: 13px; }
 .prompt pre { max-height: 460px; overflow: auto; }
 .gate-box .link { display: block; margin: 6px auto 0; }
+.gbtn { display: flex; justify-content: center; min-height: 44px; margin: 6px 0; }
 @media (max-width: 720px) { #installbtn { display: none !important; } .modal-card { padding: 22px 18px 18px; } }
 @media (max-width: 720px) { #passchip { gap: 2px; } #passchip .link { white-space: nowrap; font-size: 13px; padding: 8px 4px; } #passchip .btn { padding: 9px 12px; font-size: 13px; white-space: nowrap; } }

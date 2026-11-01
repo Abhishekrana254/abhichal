@@ -131,23 +131,53 @@ function modal(html, onMount) {
 const fld = (d, id) => $("#" + id, d);
 function say(d, msg, bad) { const m = $(".msg", d); if (m) { m.textContent = msg || ""; m.className = "msg" + (bad ? " bad" : ""); } }
 
+function loadGsi() {
+  if (window.google && window.google.accounts) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = "https://accounts.google.com/gsi/client"; s.async = true; s.onload = resolve; s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+async function acceptGoogle(d, credential) {
+  say(d, "Signing in with Google…");
+  const r = await api("/api/google", { method: "POST", body: JSON.stringify({ credential }) });
+  store.set(TOKEN_KEY, r.token);
+  await refreshMe(); paintChip(); route();
+  if (paid()) { closeModal(); return; }
+  buyModal();
+}
+function mountGoogle(d) {
+  const slot = $(".gbtn", d);
+  if (!slot || !CFG.googleClientId) { if (slot) slot.remove(); return; }
+  loadGsi().then(() => {
+    const w = Math.min(360, slot.clientWidth || 320);
+    google.accounts.id.initialize({ client_id: CFG.googleClientId, callback: (resp) => acceptGoogle(d, resp.credential).catch((e) => say(d, e.message, true)) });
+    google.accounts.id.renderButton(slot, { theme: "filled_black", size: "large", width: w, text: "continue_with", shape: "pill" });
+  }).catch(() => { slot.remove(); });
+}
+
 function buyModal() {
   track("buy_click");
+  const who = ME
+    ? `<p class="sub" style="margin-top:0">Paying as <b>${esc(ME.email)}</b>.</p><input id="b-email" type="hidden" value="${esc(ME.email)}">`
+    : `<div class="gbtn"></div><p class="fine" style="text-align:center;margin:8px 0">or pay with an email</p><label>Email<input id="b-email" type="email" autocomplete="email" placeholder="you@example.com" required></label><label>Name (optional)<input id="b-name" type="text" autocomplete="name" maxlength="60"></label>`;
   modal(`<h3>Formatly Pro</h3>
     <p class="sub" style="margin-top:0">₹${PRICE} now, then ₹${PRICE} every month until you cancel. Cancel in one click from your account. You keep access until the month you paid for ends.</p>
-    <label>Email<input id="b-email" type="email" autocomplete="email" placeholder="you@example.com" required></label>
-    <label>Name (optional)<input id="b-name" type="text" autocomplete="name" maxlength="60"></label>
+    ${who}
     <label class="check"><input id="b-agree" type="checkbox"><span>I agree to the <a href="terms.html" target="_blank" rel="noopener">terms</a> and the <a href="privacy.html" target="_blank" rel="noopener">privacy policy</a>, and that Razorpay will charge ₹${PRICE} every month (UPI AutoPay or card) until I cancel.</span></label>
     <p class="msg"></p>
     <button class="btn big" id="b-go">Continue to payment</button>
     <p class="fine">Payments run on Razorpay. We never see your card or UPI PIN. Already a member? <button class="link" data-restore>Restore access</button></p>`, (d) => {
+    if (!ME) mountGoogle(d);
     fld(d, "b-go").onclick = async () => {
       const email = fld(d, "b-email").value.trim();
+      const nameEl = fld(d, "b-name");
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return say(d, "Enter a valid email address.", true);
       if (!fld(d, "b-agree").checked) return say(d, "Please tick the box to continue.", true);
       fld(d, "b-go").disabled = true; say(d, "Creating your secure checkout…");
       try {
-        const c = await api("/api/checkout", { method: "POST", body: JSON.stringify({ email, name: fld(d, "b-name").value, agree: true, vid: visitorId(), src: sourceNow() }) });
+        const c = await api("/api/checkout", { method: "POST", body: JSON.stringify({ email, name: nameEl ? nameEl.value : (ME && ME.name) || "", agree: true, vid: visitorId(), src: sourceNow() }) });
         await openRazorpay(c, d);
       } catch (e) { fld(d, "b-go").disabled = false; say(d, e.message, true); }
     };
@@ -186,7 +216,7 @@ async function finishPayment(resp) {
 }
 function keyModal(key, firstTime) {
   modal(`<h3>${firstTime ? "You are in. Save this key." : "Your new recovery key"}</h3>
-    <p class="sub" style="margin-top:0">This key signs you in on another phone or computer. It is shown once and we store only a scrambled copy. Lost it? You can still sign in with your email and the Razorpay payment ID from your receipt.</p>
+    <p class="sub" style="margin-top:0">Keep this key as a backup. The easy way back in is Continue with Google, using the same email you paid with. The key is shown once and we store only a scrambled copy.</p>
     <pre class="keybox" id="k-key">${esc(key)}</pre>
     <div class="row"><button class="btn" id="k-copy">Copy key</button><button class="btn ghost" id="k-dl">Download</button></div>
     <label class="check"><input id="k-ok" type="checkbox"><span>I saved my recovery key.</span></label>
@@ -198,8 +228,9 @@ function keyModal(key, firstTime) {
   });
 }
 function restoreModal() {
-  modal(`<h3>Restore access</h3>
-    <p class="sub" style="margin-top:0">Already paid? Sign in with your recovery key.</p>
+  modal(`<h3>Sign in</h3>
+    <div class="gbtn"></div>
+    <p class="sub" style="margin-top:0">Or use your recovery key.</p>
     <label>Recovery key<input id="r-key" placeholder="FMLY-XXXX-XXXX-XXXX-XXXX-XXXX" autocomplete="off" spellcheck="false"></label>
     <button class="btn big" id="r-go">Sign in</button>
     <p class="sub" style="margin:18px 0 8px">No key? Use your email and the payment ID from your Razorpay receipt (starts with <code>pay_</code>).</p>
@@ -216,6 +247,7 @@ function restoreModal() {
         if (r.recoveryKey) keyModal(r.recoveryKey, false); else closeModal();
       } catch (e) { say(d, e.message, true); }
     };
+    mountGoogle(d);
     fld(d, "r-go").onclick = () => { const k = fld(d, "r-key").value.trim(); if (!k) return say(d, "Paste your recovery key.", true); go({ recoveryKey: k }); };
     fld(d, "r-go2").onclick = () => { go({ email: fld(d, "r-email").value.trim(), paymentId: fld(d, "r-pay").value.trim() }); };
   });
@@ -749,10 +781,10 @@ document.addEventListener("click", (e) => {
 window.addEventListener("hashchange", route);
 
 Promise.all([
-  fetch("./data/catalog.json?v=13").then((r) => r.json()),
-  fetch("./data/live.json?v=13").then((r) => (r.ok ? r.json() : { niches: {} })).catch(() => ({ niches: {} })),
-  fetch("./data/radar.json?v=13").then((r) => (r.ok ? r.json() : { items: [] })).catch(() => ({ items: [] })),
-  fetch("./data/free.json?v=13").then((r) => r.json())
+  fetch("./data/catalog.json?v=14").then((r) => r.json()),
+  fetch("./data/live.json?v=14").then((r) => (r.ok ? r.json() : { niches: {} })).catch(() => ({ niches: {} })),
+  fetch("./data/radar.json?v=14").then((r) => (r.ok ? r.json() : { items: [] })).catch(() => ({ items: [] })),
+  fetch("./data/free.json?v=14").then((r) => r.json())
 ]).then(([cat, live, radar, free]) => {
   CAT = cat; LIVE = live; RADAR = radar; FREE = free;
   return refreshMe();
