@@ -526,7 +526,7 @@ function homeHTML() {
           <li>Each lesson lists the sources it was researched from, and the platform rules that apply</li>
         </ul>
         ${paid() ? '<button class="btn big ghost" data-account>Pro is on · Account</button>' : `<button class="btn big" data-buy>Unlock · ₹${PRICE}/month</button>`}
-        <p class="fine">₹${PRICE} every month by UPI AutoPay or card, through Razorpay. Cancel anytime in your account and keep access to the end of the month you paid for. <a href="terms.html">Terms</a>.</p>
+        <p class="fine">₹${PRICE} every month by UPI AutoPay or card, through Razorpay. Cancel anytime in your account and keep access to the end of the month you paid for. <a href="terms.html">Terms</a> and <a href="refund.html">refunds</a>.</p>
       </div>
       <div class="plan free">
         <h3>Free</h3>
