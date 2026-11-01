@@ -207,6 +207,7 @@ async function finishPayment(resp) {
     const r = await api("/api/verify", { method: "POST", body: JSON.stringify({ razorpay_payment_id: resp.razorpay_payment_id, razorpay_subscription_id: resp.razorpay_subscription_id, razorpay_signature: resp.razorpay_signature }) });
     store.set(TOKEN_KEY, r.token);
     await refreshMe(); paintChip();
+    try { if (window.gtag) gtag("event", "conversion", { send_to: "AW-18550624955/oBsSCJ-No7AdELul0I1F", value: PRICE, currency: "INR", transaction_id: String(resp.razorpay_payment_id || "") }); } catch (_) {}
     modal(`<h3>You are in. Welcome to Pro.</h3><p class="sub">Every lesson is open now. Next time, press Sign in with <b>${esc(ME ? ME.email : "")}</b>.</p><button class="btn big" data-close>Open my lessons</button>`);
     route();
   } catch (e) {
@@ -774,10 +775,10 @@ document.addEventListener("click", (e) => {
 window.addEventListener("hashchange", route);
 
 Promise.all([
-  fetch("./data/catalog.json?v=19").then((r) => r.json()),
-  fetch("./data/live.json?v=19").then((r) => (r.ok ? r.json() : { niches: {} })).catch(() => ({ niches: {} })),
-  fetch("./data/radar.json?v=19").then((r) => (r.ok ? r.json() : { items: [] })).catch(() => ({ items: [] })),
-  fetch("./data/free.json?v=19").then((r) => r.json())
+  fetch("./data/catalog.json?v=20").then((r) => r.json()),
+  fetch("./data/live.json?v=20").then((r) => (r.ok ? r.json() : { niches: {} })).catch(() => ({ niches: {} })),
+  fetch("./data/radar.json?v=20").then((r) => (r.ok ? r.json() : { items: [] })).catch(() => ({ items: [] })),
+  fetch("./data/free.json?v=20").then((r) => r.json())
 ]).then(([cat, live, radar, free]) => {
   CAT = cat; LIVE = live; RADAR = radar; FREE = free;
   return refreshMe();
