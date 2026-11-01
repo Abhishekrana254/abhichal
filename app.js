@@ -104,6 +104,7 @@ async function refreshMe() {
   }
 }
 const paid = () => Boolean(ME && ME.active);
+const hadPlan = () => Boolean(ME && (ME.paidCount || ME.paidUntil || ME.subId || ME.status));
 async function loadLesson(id) {
   if (LESSONS[id]) return LESSONS[id];
   return (LESSONS[id] = await api("/api/lesson?id=" + encodeURIComponent(id)));
@@ -245,12 +246,12 @@ function signInModal(then, mode) {
 const restoreModal = () => signInModal();
 function accountModal() {
   if (!ME) return restoreModal();
-  const st = ME.cancelRequested ? "Cancelled. Access ends " + fmtDate(new Date(ME.paidUntil)) : paid() ? (ME.renewsAt ? "Renews on " + fmtDate(new Date(ME.renewsAt)) : "Active until " + fmtDate(new Date(ME.paidUntil))) : "Access ended " + fmtDate(new Date(ME.paidUntil || Date.now()));
+  const st = ME.cancelRequested ? "Cancelled. Access ends " + fmtDate(new Date(ME.paidUntil)) : paid() ? (ME.renewsAt ? "Renews on " + fmtDate(new Date(ME.renewsAt)) : "Active until " + fmtDate(new Date(ME.paidUntil))) : hadPlan() ? "Access ended " + fmtDate(new Date(ME.paidUntil)) : "Signed in. Pro starts after you pay.";
   modal(`<h3>Your account</h3>
-    <dl class="acct"><div><dt>Email</dt><dd>${esc(ME.email)}</dd></div><div><dt>Plan</dt><dd>Formatly Pro, ₹${PRICE} a month</dd></div><div><dt>Status</dt><dd>${esc(st)}</dd></div><div><dt>Months paid</dt><dd>${ME.paidCount || 0}</dd></div></dl>
+    <dl class="acct"><div><dt>Email</dt><dd>${esc(ME.email)}</dd></div><div><dt>Plan</dt><dd>${hadPlan() || paid() ? "Formatly Pro, ₹" + PRICE + " a month" : "None yet"}</dd></div><div><dt>Status</dt><dd>${esc(st)}</dd></div>${hadPlan() ? `<div><dt>Months paid</dt><dd>${ME.paidCount || 0}</dd></div>` : ""}</dl>
     <div class="row">
       ${paid() && !ME.cancelRequested ? '<button class="btn ghost" id="a-cancel">Cancel renewal</button>' : ""}
-      ${!paid() ? `<button class="btn" data-buy>Renew · ₹${PRICE}/month</button>` : ""}
+      ${!paid() ? `<button class="btn" data-buy>${hadPlan() ? "Renew" : "Unlock"} · ₹${PRICE}/month</button>` : ""}
       <button class="btn ghost" data-contact>Contact us</button>
       <button class="btn ghost" id="a-out">Sign out</button>
     </div>
@@ -288,7 +289,7 @@ function contactModal(kind) {
 function paintChip() {
   const el = $("#passchip");
   if (!el) return;
-  if (ME) el.innerHTML = paid() ? '<button class="btn ok" data-account>Pro · Account</button>' : `<button class="btn" data-account>Renew · Account</button>`;
+  if (ME) el.innerHTML = paid() ? '<button class="btn ok" data-account>Pro · Account</button>' : hadPlan() ? `<button class="btn" data-account>Renew · Account</button>` : `<button class="link" data-account>Account</button><button class="btn" data-buy>Unlock all · ₹${PRICE}/month</button>`;
   else el.innerHTML = `<button class="link" data-restore>Sign in</button><button class="btn" data-buy>Unlock all · ₹${PRICE}/month</button>`;
   paintInstall();
 }
@@ -772,10 +773,10 @@ document.addEventListener("click", (e) => {
 window.addEventListener("hashchange", route);
 
 Promise.all([
-  fetch("./data/catalog.json?v=17").then((r) => r.json()),
-  fetch("./data/live.json?v=17").then((r) => (r.ok ? r.json() : { niches: {} })).catch(() => ({ niches: {} })),
-  fetch("./data/radar.json?v=17").then((r) => (r.ok ? r.json() : { items: [] })).catch(() => ({ items: [] })),
-  fetch("./data/free.json?v=17").then((r) => r.json())
+  fetch("./data/catalog.json?v=18").then((r) => r.json()),
+  fetch("./data/live.json?v=18").then((r) => (r.ok ? r.json() : { niches: {} })).catch(() => ({ niches: {} })),
+  fetch("./data/radar.json?v=18").then((r) => (r.ok ? r.json() : { items: [] })).catch(() => ({ items: [] })),
+  fetch("./data/free.json?v=18").then((r) => r.json())
 ]).then(([cat, live, radar, free]) => {
   CAT = cat; LIVE = live; RADAR = radar; FREE = free;
   return refreshMe();
