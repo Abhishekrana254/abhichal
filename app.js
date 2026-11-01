@@ -6,6 +6,7 @@ const SHORTS_RPM = { us: 0.328, in: 0.008 }; // US$ per 1,000 views, AIR Media-T
 const INDIA_LONG_FACTOR = 0.74 / 14.67; // MilX long-form CPM, India vs US
 const PAGE = 24;
 
+const STYLE_TITLE = { story: "Story and comedy episodes", explainer: "Voice-over explainer: research, script, b-roll", news: "Weekly news and tools roundup", tutorial: "Screen tutorial: plan, record, chapter", listicle: "Review or ranked list: criteria first", animation: "Stick-figure and whiteboard animation", satisfying: "Satisfying and ASMR clips: one action, one sound", handson: "Hands-on how-to: film it, cut it, caption it", commentary: "Commentary and breakdowns: transformation first", quote: "Quote and affirmation Shorts: original script, licensed music", ambient: "Ambient and AI music: curate, do not loop" };
 const AI_LABEL = { F: "Made with AI", A: "AI helps", R: "Your footage" };
 const STYLE_NAME = {
   story: "Story and comedy episode",
@@ -500,7 +501,7 @@ function homeHTML() {
     <div class="stats">
       <div class="stat"><b>${total}</b><span>niches in the scan</span></div>
       <div class="stat"><b>${withTop}</b><span>with a top video this week</span></div>
-      <div class="stat"><b>${recipes}</b><span>AI formats with full recipes</span></div>
+      <div class="stat"><b>${recipes + new Set(CAT.niches.map((x) => x.style)).size}</b><span>step-by-step playbooks, every niche covered</span></div>
       <div class="stat"><b>${CAT.sources ? Object.keys(CAT.sources).length : 0}</b><span>cited sources for the money</span></div>
     </div>
   </div>
@@ -562,10 +563,10 @@ function homeHTML() {
         <h3>Pro</h3>
         <div class="p">₹${PRICE}<small> / month</small></div>
         <ul>
-          <li>All ${recipes} AI formats as full recipes: a master prompt for ChatGPT that writes your Google Flow prompts</li>
+          <li>${recipes} deep recipes for the AI formats that are working (horror, myth, baby comedy and more): a master prompt for ChatGPT that writes your Google Flow prompts</li>
           <li>Character lock and voice lock blocks so the same cast and voice come back every episode</li>
           <li>The input to send each time, an example, the Flow settings and a pre-post checklist</li>
-          <li>A playbook with its own master prompt for every other niche (${total} in all)</li>
+          <li>${new Set(CAT.niches.map((x) => x.style)).size} format playbooks, each with its own master prompt, that cover every other niche (${total} in all). Finance, health, tech, food, DIY and the rest are made as explainers, how-tos, news roundups and so on, and each playbook says how.</li>
           <li>Each lesson lists the sources it was researched from, and the platform rules that apply</li>
         </ul>
         ${paid() ? '<button class="btn big ghost" data-account>Pro is on · Account</button>' : `<button class="btn big" data-buy>Unlock · ₹${PRICE}/month</button>`}
@@ -660,7 +661,7 @@ function lockedLesson(n, why) {
   return `<div class="cols locked">
       <div class="panel ghost"><h3>How to make it</h3><ol class="steps">${Array.from({ length: 6 }, () => "<li>Placeholder line that stays hidden until you are a Pro member, six steps in all.</li>").join("")}</ol></div>
       <div class="panel ghost"><h3>Master prompt</h3><div class="prompt"><header><b>1. Master prompt</b></header><pre>Placeholder text that stays hidden until you are a Pro member. The real prompt is not in this page.</pre></div><div class="prompt"><pre>Placeholder text.</pre></div></div>
-      <div class="gate"><div class="gate-box"><span class="badge b-F">Pro</span><b>${isRecipe ? "Full recipe, master prompt and locks" : "Full playbook and master prompt"}</b><p>${why ? esc(why) + " " : ""}The ChatGPT master prompt, the character and voice locks, the Flow settings, the checklist and the sources for ${esc(n.name)}. ₹${PRICE} a month, cancel anytime.</p><button class="btn big" data-buy>Unlock · ₹${PRICE}/month</button><button class="link" data-restore>Sign in or create an account</button></div></div>
+      <div class="gate"><div class="gate-box"><span class="badge b-F">Pro</span><b>${isRecipe ? "Full recipe, master prompt and locks" : "Full playbook and master prompt"}</b><p>${!isRecipe && STYLE_TITLE[n.style] ? "This niche is made with the “" + esc(STYLE_TITLE[n.style]) + "” playbook, with " + esc(n.name) + " filled in for you. " : ""}${why ? esc(why) + " " : ""}${isRecipe ? "The ChatGPT master prompt, the character and voice locks, the Flow settings, the checklist and the sources" : "The ChatGPT master prompt, the step-by-step plan, the tools, the checklist and the sources"} for ${esc(n.name)}. ₹${PRICE} a month, cancel anytime.</p><button class="btn big" data-buy>Unlock · ₹${PRICE}/month</button><button class="link" data-restore>Sign in or create an account</button></div></div>
     </div>`;
 }
 async function hydrateLesson(n) {
@@ -773,10 +774,10 @@ document.addEventListener("click", (e) => {
 window.addEventListener("hashchange", route);
 
 Promise.all([
-  fetch("./data/catalog.json?v=18").then((r) => r.json()),
-  fetch("./data/live.json?v=18").then((r) => (r.ok ? r.json() : { niches: {} })).catch(() => ({ niches: {} })),
-  fetch("./data/radar.json?v=18").then((r) => (r.ok ? r.json() : { items: [] })).catch(() => ({ items: [] })),
-  fetch("./data/free.json?v=18").then((r) => r.json())
+  fetch("./data/catalog.json?v=19").then((r) => r.json()),
+  fetch("./data/live.json?v=19").then((r) => (r.ok ? r.json() : { niches: {} })).catch(() => ({ niches: {} })),
+  fetch("./data/radar.json?v=19").then((r) => (r.ok ? r.json() : { items: [] })).catch(() => ({ items: [] })),
+  fetch("./data/free.json?v=19").then((r) => r.json())
 ]).then(([cat, live, radar, free]) => {
   CAT = cat; LIVE = live; RADAR = radar; FREE = free;
   return refreshMe();
