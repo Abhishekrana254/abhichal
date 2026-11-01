@@ -145,7 +145,7 @@ async function acceptGoogle(d, credential) {
   store.set(TOKEN_KEY, r.token);
   await refreshMe(); paintChip(); route();
   if (paid()) { closeModal(); return; }
-  buyModal();
+  if (d && d.dataset && d.dataset.then === "buy") buyModal(true); else closeModal();
 }
 function mountGoogle(d) {
   const slot = $(".gbtn", d);
@@ -157,27 +157,22 @@ function mountGoogle(d) {
   }).catch(() => { slot.remove(); });
 }
 
-function buyModal() {
-  track("buy_click");
-  const who = ME
-    ? `<p class="sub" style="margin-top:0">Paying as <b>${esc(ME.email)}</b>.</p><input id="b-email" type="hidden" value="${esc(ME.email)}">`
-    : `<div class="gbtn"></div><p class="fine" style="text-align:center;margin:8px 0">or pay with an email</p><label>Email<input id="b-email" type="email" autocomplete="email" placeholder="you@example.com" required></label><label>Name (optional)<input id="b-name" type="text" autocomplete="name" maxlength="60"></label>`;
+function buyModal(again) {
+  if (!again) track("buy_click");
+  if (!ME) return signInModal("buy");
   modal(`<h3>Formatly Pro</h3>
     <p class="sub" style="margin-top:0">₹${PRICE} now, then ₹${PRICE} every month until you cancel. Cancel in one click from your account. You keep access until the month you paid for ends.</p>
-    ${who}
+    <p class="sub">Paying as <b>${esc(ME.email)}</b>. <button class="link" id="b-switch">Not you?</button></p>
     <label class="check"><input id="b-agree" type="checkbox"><span>I agree to the <a href="terms.html" target="_blank" rel="noopener">terms</a> and the <a href="privacy.html" target="_blank" rel="noopener">privacy policy</a>, and that Razorpay will charge ₹${PRICE} every month (UPI AutoPay or card) until I cancel.</span></label>
     <p class="msg"></p>
     <button class="btn big" id="b-go">Continue to payment</button>
-    <p class="fine">Payments run on Razorpay. We never see your card or UPI PIN. Already a member? <button class="link" data-restore>Restore access</button></p>`, (d) => {
-    if (!ME) mountGoogle(d);
+    <p class="fine">Payments run on Razorpay. We never see your card or UPI PIN.</p>`, (d) => {
+    fld(d, "b-switch").onclick = () => { signOut(); signInModal("buy"); };
     fld(d, "b-go").onclick = async () => {
-      const email = fld(d, "b-email").value.trim();
-      const nameEl = fld(d, "b-name");
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return say(d, "Enter a valid email address.", true);
       if (!fld(d, "b-agree").checked) return say(d, "Please tick the box to continue.", true);
       fld(d, "b-go").disabled = true; say(d, "Creating your secure checkout…");
       try {
-        const c = await api("/api/checkout", { method: "POST", body: JSON.stringify({ email, name: nameEl ? nameEl.value : (ME && ME.name) || "", agree: true, vid: visitorId(), src: sourceNow() }) });
+        const c = await api("/api/checkout", { method: "POST", body: JSON.stringify({ email: ME.email, name: ME.name || "", agree: true, vid: visitorId(), src: sourceNow() }) });
         await openRazorpay(c, d);
       } catch (e) { fld(d, "b-go").disabled = false; say(d, e.message, true); }
     };
@@ -208,50 +203,24 @@ async function finishPayment(resp) {
     const r = await api("/api/verify", { method: "POST", body: JSON.stringify({ razorpay_payment_id: resp.razorpay_payment_id, razorpay_subscription_id: resp.razorpay_subscription_id, razorpay_signature: resp.razorpay_signature }) });
     store.set(TOKEN_KEY, r.token);
     await refreshMe(); paintChip();
-    keyModal(r.recoveryKey, true);
+    modal(`<h3>You are in. Welcome to Pro.</h3><p class="sub">Every lesson is open now. Next time, press Sign in and Continue with Google using <b>${esc(ME ? ME.email : "")}</b>.</p><button class="btn big" data-close>Open my lessons</button>`);
     route();
   } catch (e) {
-    modal(`<h3>Payment received, access is pending</h3><p class="sub">${esc(e.message)}</p><p class="sub">Your payment ID: <code>${esc(resp.razorpay_payment_id || "")}</code>. Keep it. Tap Restore access with your email and this ID, or contact us and we will fix it the same day.</p><div class="row"><button class="btn" data-restore>Restore access</button><button class="btn ghost" data-contact>Contact us</button></div>`);
+    modal(`<h3>Payment received, access is pending</h3><p class="sub">${esc(e.message)}</p><p class="sub">Your payment ID: <code>${esc(resp.razorpay_payment_id || "")}</code>. Keep it. Sign in again with Google in a minute, or contact us and we will fix it the same day.</p><div class="row"><button class="btn" data-restore>Sign in</button><button class="btn ghost" data-contact>Contact us</button></div>`);
   }
 }
-function keyModal(key, firstTime) {
-  modal(`<h3>${firstTime ? "You are in. Save this key." : "Your new recovery key"}</h3>
-    <p class="sub" style="margin-top:0">Keep this key as a backup. The easy way back in is Continue with Google, using the same email you paid with. The key is shown once and we store only a scrambled copy.</p>
-    <pre class="keybox" id="k-key">${esc(key)}</pre>
-    <div class="row"><button class="btn" id="k-copy">Copy key</button><button class="btn ghost" id="k-dl">Download</button></div>
-    <label class="check"><input id="k-ok" type="checkbox"><span>I saved my recovery key.</span></label>
-    <button class="btn big" id="k-done" disabled>Open my lessons</button>`, (d) => {
-    fld(d, "k-copy").onclick = () => { navigator.clipboard && navigator.clipboard.writeText(key); fld(d, "k-copy").textContent = "Copied"; };
-    fld(d, "k-dl").onclick = () => { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob(["Formatly recovery key\n" + key + "\n"], { type: "text/plain" })); a.download = "formatly-recovery-key.txt"; a.click(); };
-    fld(d, "k-ok").onchange = () => { fld(d, "k-done").disabled = !fld(d, "k-ok").checked; };
-    fld(d, "k-done").onclick = closeModal;
-  });
-}
-function restoreModal() {
-  modal(`<h3>Sign in</h3>
+function signInModal(then) {
+  modal(`<h3>Sign in or sign up</h3>
+    <p class="sub" style="margin-top:0">${then === "buy" ? "Continue with Google to unlock Pro. " : ""}New here? The same button creates your account. We only get your name and email.</p>
     <div class="gbtn"></div>
-    <p class="sub" style="margin-top:0">Or use your recovery key.</p>
-    <label>Recovery key<input id="r-key" placeholder="FMLY-XXXX-XXXX-XXXX-XXXX-XXXX" autocomplete="off" spellcheck="false"></label>
-    <button class="btn big" id="r-go">Sign in</button>
-    <p class="sub" style="margin:18px 0 8px">No key? Use your email and the payment ID from your Razorpay receipt (starts with <code>pay_</code>).</p>
-    <label>Email<input id="r-email" type="email" autocomplete="email"></label>
-    <label>Payment ID<input id="r-pay" placeholder="pay_XXXXXXXXXXXXXX" autocomplete="off" spellcheck="false"></label>
-    <button class="btn" id="r-go2">Sign in with email and payment ID</button>
-    <p class="msg"></p>`, (d) => {
-    const go = async (body) => {
-      say(d, "Checking…");
-      try {
-        const r = await api("/api/restore", { method: "POST", body: JSON.stringify(body) });
-        store.set(TOKEN_KEY, r.token); track("restore_ok");
-        await refreshMe(); paintChip(); route();
-        if (r.recoveryKey) keyModal(r.recoveryKey, false); else closeModal();
-      } catch (e) { say(d, e.message, true); }
-    };
+    <p class="msg"></p>
+    <p class="fine">By continuing you agree to the <a href="terms.html" target="_blank" rel="noopener">terms</a> and <a href="privacy.html" target="_blank" rel="noopener">privacy policy</a>.</p>`, (d) => {
+    if (then) d.dataset.then = then;
     mountGoogle(d);
-    fld(d, "r-go").onclick = () => { const k = fld(d, "r-key").value.trim(); if (!k) return say(d, "Paste your recovery key.", true); go({ recoveryKey: k }); };
-    fld(d, "r-go2").onclick = () => { go({ email: fld(d, "r-email").value.trim(), paymentId: fld(d, "r-pay").value.trim() }); };
+    setTimeout(() => { if (!window.google || !$(".gbtn iframe, .gbtn div", d)) say(d, "Google sign-in could not load. Check your connection, or write to " + (CFG.supportEmail || "us") + ".", true); }, 6000);
   });
 }
+const restoreModal = () => signInModal();
 function accountModal() {
   if (!ME) return restoreModal();
   const st = ME.cancelRequested ? "Cancelled. Access ends " + fmtDate(new Date(ME.paidUntil)) : paid() ? (ME.renewsAt ? "Renews on " + fmtDate(new Date(ME.renewsAt)) : "Active until " + fmtDate(new Date(ME.paidUntil))) : "Access ended " + fmtDate(new Date(ME.paidUntil || Date.now()));
@@ -264,7 +233,7 @@ function accountModal() {
       <button class="btn ghost" id="a-out">Sign out</button>
     </div>
     <p class="msg"></p>
-    <p class="fine">Need your key on another device? Sign in there with your email and payment ID, which also creates a fresh key.</p>`, (d) => {
+    <p class="fine">On another phone or computer, press Sign in and Continue with Google with this email.</p>`, (d) => {
     fld(d, "a-out").onclick = signOut;
     const c = fld(d, "a-cancel");
     if (c) c.onclick = async () => {
@@ -601,8 +570,8 @@ function homeHTML() {
       <details><summary>Will I get these views?</summary><p>No promise. A top video this week shows what an audience is watching. It does not say what a new channel will get.</p></details>
       <details><summary>Does Pro renew by itself? How do I cancel?</summary><p>Yes. Pro is ₹149 a month and renews on its own through Razorpay (UPI AutoPay or card). Open Account, press Cancel renewal, and the next charge does not happen. The month you already paid for is not refunded. You keep access until that month ends. Razorpay may ask you to approve the mandate in your UPI app the first time.</p></details>
       <details><summary>Can I get a refund?</summary><p>No. Cancel stops future charges only. The ₹149 already taken stays, and access stays until that month ends.</p></details>
-      <details><summary>How do I sign in on another phone or computer?</summary><p>After paying you get a recovery key, shown once. Choose Sign in, then paste it. If you lost it, sign in with your email and the payment ID (starts with pay_) from your Razorpay receipt. That also gives you a fresh key.</p></details>
-      <details><summary>I paid but I have no access</summary><p>Press Sign in, then use your email and the payment ID from the receipt. If that still fails, use Contact us at the bottom of the page and include the payment ID. We fix it the same day.</p></details>
+      <details><summary>How do I sign in on another phone or computer?</summary><p>Press Sign in and choose Continue with Google, using the same Google account you paid with. That is all.</p></details>
+      <details><summary>I paid but I have no access</summary><p>Press Sign in and continue with the same Google account you paid with. If that still fails, use Contact us at the bottom of the page and include the payment ID from your receipt. We fix it the same day.</p></details>
       <details><summary>What do you store about me?</summary><p>Your email, name and the phone number Razorpay shares, your subscription status, and anonymous page counts. No card or UPI details ever reach us. See the <a href="privacy.html">privacy policy</a>.</p></details>
       <details><summary>Do I have to mark AI videos?</summary><p>YouTube has a setting to disclose realistic altered or synthetic content. Turn it on. Every recipe says so, and every recipe uses original characters, not real people.</p></details>
     </div>
@@ -668,7 +637,7 @@ function lockedLesson(n, why) {
   return `<div class="cols locked">
       <div class="panel ghost"><h3>How to make it</h3><ol class="steps">${Array.from({ length: 6 }, () => "<li>Placeholder line that stays hidden until you are a Pro member, six steps in all.</li>").join("")}</ol></div>
       <div class="panel ghost"><h3>Master prompt</h3><div class="prompt"><header><b>1. Master prompt</b></header><pre>Placeholder text that stays hidden until you are a Pro member. The real prompt is not in this page.</pre></div><div class="prompt"><pre>Placeholder text.</pre></div></div>
-      <div class="gate"><div class="gate-box"><span class="badge b-F">Pro</span><b>${isRecipe ? "Full recipe, master prompt and locks" : "Full playbook and master prompt"}</b><p>${why ? esc(why) + " " : ""}The ChatGPT master prompt, the character and voice locks, the Flow settings, the checklist and the sources for ${esc(n.name)}. ₹${PRICE} a month, cancel anytime.</p><button class="btn big" data-buy>Unlock · ₹${PRICE}/month</button><button class="link" data-restore>Already a member? Sign in</button></div></div>
+      <div class="gate"><div class="gate-box"><span class="badge b-F">Pro</span><b>${isRecipe ? "Full recipe, master prompt and locks" : "Full playbook and master prompt"}</b><p>${why ? esc(why) + " " : ""}The ChatGPT master prompt, the character and voice locks, the Flow settings, the checklist and the sources for ${esc(n.name)}. ₹${PRICE} a month, cancel anytime.</p><button class="btn big" data-buy>Unlock · ₹${PRICE}/month</button><button class="link" data-restore>Sign in or sign up</button></div></div>
     </div>`;
 }
 async function hydrateLesson(n) {
@@ -781,10 +750,10 @@ document.addEventListener("click", (e) => {
 window.addEventListener("hashchange", route);
 
 Promise.all([
-  fetch("./data/catalog.json?v=15").then((r) => r.json()),
-  fetch("./data/live.json?v=15").then((r) => (r.ok ? r.json() : { niches: {} })).catch(() => ({ niches: {} })),
-  fetch("./data/radar.json?v=15").then((r) => (r.ok ? r.json() : { items: [] })).catch(() => ({ items: [] })),
-  fetch("./data/free.json?v=15").then((r) => r.json())
+  fetch("./data/catalog.json?v=16").then((r) => r.json()),
+  fetch("./data/live.json?v=16").then((r) => (r.ok ? r.json() : { niches: {} })).catch(() => ({ niches: {} })),
+  fetch("./data/radar.json?v=16").then((r) => (r.ok ? r.json() : { items: [] })).catch(() => ({ items: [] })),
+  fetch("./data/free.json?v=16").then((r) => r.json())
 ]).then(([cat, live, radar, free]) => {
   CAT = cat; LIVE = live; RADAR = radar; FREE = free;
   return refreshMe();
