@@ -49,6 +49,24 @@ function visitorId() {
   if (!v) { v = (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2) + Date.now()); store.set(VID_KEY, v); }
   return v;
 }
+const SRC_KEY = "formatly-src";
+// Where this visitor came from: "source/medium/campaign". A tagged link (utm_*) or a Google Ads click (gclid) wins and is remembered;
+// otherwise we keep what we saw first, then the referring site, then "direct".
+function sourceNow() {
+  const q = new URLSearchParams(location.search);
+  const us = q.get("utm_source");
+  let fresh = "";
+  if (us) fresh = [us, q.get("utm_medium") || "", q.get("utm_campaign") || ""].join("/").replace(/\/+$/, "");
+  else if (q.get("gclid")) fresh = "google/cpc";
+  if (fresh) { store.set(SRC_KEY, fresh.toLowerCase()); return fresh.toLowerCase(); }
+  const saved = store.get(SRC_KEY);
+  if (saved) return saved;
+  try {
+    const h = document.referrer ? new URL(document.referrer).hostname.replace(/^www\./, "") : "";
+    if (h && h !== location.hostname) { const v = h + "/referral"; store.set(SRC_KEY, v); return v; }
+  } catch { /* ignore */ }
+  return "direct";
+}
 const doNotTrack = () => navigator.doNotTrack === "1" || window.doNotTrack === "1";
 function track(t, extra) {
   if (!API || doNotTrack()) return;
@@ -57,7 +75,7 @@ function track(t, extra) {
   if (ref === location.hostname) ref = "";
   const first = t === "pv";
   const body = JSON.stringify({
-    t, vid: visitorId(),
+    t, vid: visitorId(), src: sourceNow(),
     ref: first ? ref : undefined,
     utm: first ? new URLSearchParams(location.search).get("utm_source") || "" : undefined,
     dev: /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ? "m" : "d",
@@ -129,7 +147,7 @@ function buyModal() {
       if (!fld(d, "b-agree").checked) return say(d, "Please tick the box to continue.", true);
       fld(d, "b-go").disabled = true; say(d, "Creating your secure checkout…");
       try {
-        const c = await api("/api/checkout", { method: "POST", body: JSON.stringify({ email, name: fld(d, "b-name").value, agree: true, vid: visitorId() }) });
+        const c = await api("/api/checkout", { method: "POST", body: JSON.stringify({ email, name: fld(d, "b-name").value, agree: true, vid: visitorId(), src: sourceNow() }) });
         await openRazorpay(c, d);
       } catch (e) { fld(d, "b-go").disabled = false; say(d, e.message, true); }
     };
@@ -159,7 +177,6 @@ async function finishPayment(resp) {
   try {
     const r = await api("/api/verify", { method: "POST", body: JSON.stringify({ razorpay_payment_id: resp.razorpay_payment_id, razorpay_subscription_id: resp.razorpay_subscription_id, razorpay_signature: resp.razorpay_signature }) });
     store.set(TOKEN_KEY, r.token);
-    track("paid_ok");
     await refreshMe(); paintChip();
     keyModal(r.recoveryKey, true);
     route();
@@ -250,6 +267,7 @@ function paintChip() {
   if (!el) return;
   if (ME) el.innerHTML = paid() ? '<button class="btn ok" data-account>Pro · Account</button>' : `<button class="btn" data-account>Renew · Account</button>`;
   else el.innerHTML = `<button class="link" data-restore>Sign in</button><button class="btn" data-buy>Unlock all · ₹${PRICE}/month</button>`;
+  paintInstall();
 }
 
 /* ---------- install and engagement tracking ---------- */
@@ -259,7 +277,8 @@ function paintInstall() {
   const b = $("#installbtn");
   if (!b) return;
   const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-  b.hidden = standalone() || !(deferredInstall || ios);
+  // Offer the install after someone has paid, not on the first visit from an ad.
+  b.hidden = standalone() || !paid() || !(deferredInstall || ios);
 }
 window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); deferredInstall = e; track("install_prompt"); paintInstall(); });
 window.addEventListener("appinstalled", () => { track("installed"); deferredInstall = null; paintInstall(); });
@@ -730,10 +749,10 @@ document.addEventListener("click", (e) => {
 window.addEventListener("hashchange", route);
 
 Promise.all([
-  fetch("./data/catalog.json?v=12").then((r) => r.json()),
-  fetch("./data/live.json?v=12").then((r) => (r.ok ? r.json() : { niches: {} })).catch(() => ({ niches: {} })),
-  fetch("./data/radar.json?v=12").then((r) => (r.ok ? r.json() : { items: [] })).catch(() => ({ items: [] })),
-  fetch("./data/free.json?v=12").then((r) => r.json())
+  fetch("./data/catalog.json?v=13").then((r) => r.json()),
+  fetch("./data/live.json?v=13").then((r) => (r.ok ? r.json() : { niches: {} })).catch(() => ({ niches: {} })),
+  fetch("./data/radar.json?v=13").then((r) => (r.ok ? r.json() : { items: [] })).catch(() => ({ items: [] })),
+  fetch("./data/free.json?v=13").then((r) => r.json())
 ]).then(([cat, live, radar, free]) => {
   CAT = cat; LIVE = live; RADAR = radar; FREE = free;
   return refreshMe();
