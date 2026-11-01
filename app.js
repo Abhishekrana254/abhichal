@@ -526,7 +526,7 @@ function homeHTML() {
           <li>Each lesson lists the sources it was researched from, and the platform rules that apply</li>
         </ul>
         ${paid() ? '<button class="btn big ghost" data-account>Pro is on · Account</button>' : `<button class="btn big" data-buy>Unlock · ₹${PRICE}/month</button>`}
-        <p class="fine">₹${PRICE} every month by UPI AutoPay or card, through Razorpay. Cancel anytime in your account and keep access to the end of the month you paid for. <a href="terms.html">Terms and refunds</a>.</p>
+        <p class="fine">₹${PRICE} every month by UPI AutoPay or card, through Razorpay. Cancel anytime in your account and keep access to the end of the month you paid for. <a href="terms.html">Terms</a>.</p>
       </div>
       <div class="plan free">
         <h3>Free</h3>
@@ -548,7 +548,8 @@ function homeHTML() {
       <details><summary>How is "this week" measured?</summary><p>Every Monday a script runs a YouTube search for each niche, limited to videos uploaded that week and sorted by views, and records the top three. Where a result does not look like the niche, the page marks it as a loose match. Instagram has no public counters, so Instagram fit is a judgement about the format, not a measurement.</p></details>
       <details><summary>Does Instagram pay per view in India?</summary><p>No. Instagram's own help page says its bonus programs are invite-only and run in the US, South Korea, and Japan. In India, money comes from gifts, subscriptions (10,000 followers), brand deals, affiliate links, or selling your own product. Views are how you reach those.</p></details>
       <details><summary>Will I get these views?</summary><p>No promise. A top video this week shows what an audience is watching. It does not say what a new channel will get.</p></details>
-      <details><summary>Does Pro renew by itself? How do I cancel?</summary><p>Yes. Pro is ₹149 a month and renews on its own through Razorpay (UPI AutoPay or card). Open Account, press Cancel renewal, and no further charge is made. You keep access until the end of the month you already paid for. Razorpay may ask you to approve the mandate in your UPI app the first time.</p></details>
+      <details><summary>Does Pro renew by itself? How do I cancel?</summary><p>Yes. Pro is ₹149 a month and renews on its own through Razorpay (UPI AutoPay or card). Open Account, press Cancel renewal, and the next charge does not happen. The month you already paid for is not refunded. You keep access until that month ends. Razorpay may ask you to approve the mandate in your UPI app the first time.</p></details>
+      <details><summary>Can I get a refund?</summary><p>No. Cancel stops future charges only. The ₹149 already taken stays, and access stays until that month ends.</p></details>
       <details><summary>How do I sign in on another phone or computer?</summary><p>After paying you get a recovery key, shown once. Choose Sign in, then paste it. If you lost it, sign in with your email and the payment ID (starts with pay_) from your Razorpay receipt. That also gives you a fresh key.</p></details>
       <details><summary>I paid but I have no access</summary><p>Press Sign in, then use your email and the payment ID from the receipt. If that still fails, use Contact us at the bottom of the page and include the payment ID. We fix it the same day.</p></details>
       <details><summary>What do you store about me?</summary><p>Your email, name and the phone number Razorpay shares, your subscription status, and anonymous page counts. No card or UPI details ever reach us. See the <a href="privacy.html">privacy policy</a>.</p></details>
