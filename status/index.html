@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#09090b"><meta name="robots" content="noindex">
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="../icons/icon-192.png"><link rel="apple-touch-icon" href="../icons/icon-512.png">
+<title>Formatly Status</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#09090b;color:#ececf1;font:15px/1.45 system-ui,sans-serif;padding:max(14px,env(safe-area-inset-top)) 14px 40px}
+h1{font-size:19px;margin:4px 0 2px}h2{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#9b9ba6;margin:0 0 8px}
+.card{background:#14141a;border:1px solid #23232c;border-radius:14px;padding:14px;margin:12px 0}
+.row{display:flex;gap:8px;flex-wrap:wrap}.k{flex:1 1 30%;min-width:84px}.k b{display:block;font-size:22px}.k span{font-size:12px;color:#9b9ba6}
+.pill{display:inline-block;padding:2px 10px;border-radius:99px;font-size:12px;font-weight:600;background:#23232c}
+.ok{background:#12351f;color:#7dffa7}.warn{background:#3a2e10;color:#ffd166}.bad{background:#401a1a;color:#ff8a8a}
+table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:5px 4px;text-align:right;border-bottom:1px solid #1d1d25}td:first-child,th:first-child{text-align:left;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+th{color:#9b9ba6;font-weight:500}pre{white-space:pre-wrap;font:12px/1.5 ui-monospace,monospace;color:#c9c9d3;margin:0}
+button,input{font:inherit;border-radius:10px;border:1px solid #2c2c37;background:#1b1b23;color:#fff;padding:9px 12px}button.p{background:#d7ff3f;color:#111;border:0;font-weight:700}
+.muted{color:#9b9ba6;font-size:12px}a{color:#d7ff3f}
+</style></head><body>
+<h1>Formatly Status</h1><div class="muted" id="upd">Loading…</div>
+<div id="login" class="card" hidden><h2>Admin key</h2><p class="muted">Paste once. It stays only on this phone.</p><input id="key" type="password" placeholder="Admin key" style="width:100%;margin-bottom:8px"><button class="p" id="save">Open</button></div>
+<div id="app"></div>
+<div class="row" style="margin-top:14px"><button id="refresh">Refresh</button><button id="install" class="p" hidden>Install app</button><a class="muted" style="align-self:center" href="https://ads.google.com/aw/campaigns?ocid=8642549642" target="_blank" rel="noopener">Open Google Ads</a></div>
+<script>
+const API="https://formatly-api.vercel.app/api/admin";
+const $=(i)=>document.getElementById(i);const inr=(n)=>"₹"+Number(n||0).toLocaleString("en-IN",{maximumFractionDigits:0});
+const esc=(s)=>String(s).replace(/[&<>"]/g,(c)=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+if(location.hash.startsWith("#k=")){localStorage.setItem("fmk",decodeURIComponent(location.hash.slice(3)));history.replaceState(null,"",location.pathname)}
+let deferred;window.addEventListener("beforeinstallprompt",(e)=>{e.preventDefault();deferred=e;$("install").hidden=false});
+$("install").onclick=async()=>{if(deferred){deferred.prompt();deferred=null;$("install").hidden=true}};
+if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+$("save").onclick=()=>{localStorage.setItem("fmk",$("key").value.trim());load()};$("refresh").onclick=load;
+async function get(a){const r=await fetch(API+"?action="+a,{headers:{Authorization:"Bearer "+localStorage.getItem("fmk")}});if(r.status===401)throw new Error("auth");if(!r.ok)throw new Error("HTTP "+r.status);return r.json()}
+const kv=(n,l)=>`<div class="k"><b>${n}</b><span>${l}</span></div>`;
+function pill(t,c){return `<span class="pill ${c}">${esc(t)}</span>`}
+async function load(){
+  if(!localStorage.getItem("fmk")){$("login").hidden=false;$("upd").textContent="Locked";return}
+  try{
+    const [ads,st]=await Promise.all([get("ads"),get("stats&days=7")]);$("login").hidden=true;
+    const ch=(st.channels||[]);const g=ch.filter(x=>/^google/i.test(x.src));const sum=(a,k)=>a.reduce((s,x)=>s+(x[k]||0),0);
+    const gPaid=sum(g,"paid"),gSpend=ads.total?ads.total.cost:0,gRev=gPaid*149;
+    let h="";
+    if(ads.empty){h+=`<div class="card"><h2>Ads</h2>No snapshot yet. It appears within 30 minutes.</div>`}
+    else{
+      const c=ads.campaign,t=ads.total,ap=(ads.ad||{}).approval;
+      const cls=c.status==="ENABLED"?(c.primary==="ELIGIBLE"?"ok":"warn"):"bad";
+      h+=`<div class="card"><h2>Google Ads</h2><div style="margin-bottom:10px">${pill(c.status+" / "+c.primary,cls)} ${pill("ad "+(ap||"?").toLowerCase(),ap==="APPROVED"?"ok":"warn")} ${pill("budget "+inr(c.budget)+"/day","")}</div>
+      ${c.reasons&&c.reasons.length?`<div class="muted" style="margin-bottom:8px">${esc(c.reasons.join(", ").toLowerCase().replaceAll("_"," "))}</div>`:""}
+      <div class="row">${kv(inr(t.cost),"spent total")}${kv(t.clicks,"clicks")}${kv(t.impr,"impressions")}${kv(t.conv,"purchases")}${kv(t.clicks?inr(t.cost/t.clicks):"–","avg cost/click")}${kv(t.conv?inr(t.cost/t.conv):"–","cost/purchase")}</div></div>`;
+    }
+    h+=`<div class="card"><h2>Money (last 7 days)</h2><div class="row">${kv(inr(st.members.mrr_inr),"monthly income now")}${kv(st.members.active,"active members")}${kv(inr(gRev),"from Google")}${kv(inr(gRev-gSpend),"Google profit")}${kv(sum(g,"visitors"),"Google visitors")}${kv(gPaid,"Google payments")}</div></div>`;
+    if(ch.length)h+=`<div class="card"><h2>Channels</h2><table><tr><th>Source</th><th>Visits</th><th>Buy</th><th>Pay</th></tr>${ch.slice(0,8).map(x=>`<tr><td>${esc(x.src)}</td><td>${x.visitors}</td><td>${x.buy_click}</td><td>${x.paid}</td></tr>`).join("")}</table></div>`;
+    if(ads.days&&ads.days.length)h+=`<div class="card"><h2>Days</h2><table><tr><th>Date</th><th>Impr</th><th>Clk</th><th>Cost</th><th>Buy</th></tr>${ads.days.map(d=>`<tr><td>${d.date.slice(5)}</td><td>${d.impr}</td><td>${d.clicks}</td><td>${inr(d.cost)}</td><td>${d.conv}</td></tr>`).join("")}</table></div>`;
+    if(ads.keywords&&ads.keywords.length)h+=`<div class="card"><h2>Keywords</h2><table><tr><th>Keyword</th><th>Impr</th><th>Clk</th><th>Cost</th></tr>${ads.keywords.map(k=>`<tr><td>${esc(k.kw)}</td><td>${k.impr}</td><td>${k.clicks}</td><td>${inr(k.cost)}</td></tr>`).join("")}</table></div>`;
+    if(ads.terms&&ads.terms.length)h+=`<div class="card"><h2>What people searched</h2><table><tr><th>Search</th><th>Impr</th><th>Clk</th><th>Cost</th></tr>${ads.terms.map(k=>`<tr><td>${esc(k.term)}</td><td>${k.impr}</td><td>${k.clicks}</td><td>${inr(k.cost)}</td></tr>`).join("")}</table></div>`;
+    if(ads.optimizer)h+=`<div class="card"><h2>What the AI did (latest)</h2><pre>${esc(ads.optimizer)}</pre></div>`;
+    $("app").innerHTML=h;$("upd").textContent="Ads data "+(ads.updatedAt?new Date(ads.updatedAt).toLocaleString():"–")+" · opened "+new Date().toLocaleTimeString();
+  }catch(e){if(e.message==="auth"){localStorage.removeItem("fmk");$("login").hidden=false;$("upd").textContent="Wrong key"}else $("upd").textContent="Could not load: "+e.message}
+}
+load();setInterval(load,60000);
+</script></body></html>
