@@ -493,12 +493,18 @@ function homeHTML() {
   const radar = (RADAR.items || []).slice(0, 8);
   const groups = Object.keys(CAT.groups);
   const gchips = ['<button class="on" data-g="all">All</button>'].concat(groups.map((g) => `<button data-g="${g}">${esc(CAT.groups[g].name)}</button>`)).join("");
+  const fromAd = /[?&](gclid=|utm_source=(google|instagram))/.test(location.search);
+  const heroMain = fromAd
+    ? `<h1>Copy-paste <em>AI video prompts</em> that already got millions of views.</h1>
+    <p class="lead">Pick a viral AI format, copy its master prompt, and paste it into Google Flow, Veo or ChatGPT. This is not a video generator: it is the prompts and steps that make the video in your own tool. The full AI baby comedy lesson with 3 master prompts is free. Pro is ₹${PRICE}/month for all ${total} niches.</p>
+    <div class="cta"><a class="btn big" href="#/n/ai-baby-comedy">Open the free lesson</a><button class="btn big ghost" data-go="pricing">See Pro · ₹${PRICE}/month</button></div>`
+    : `<h1>What is working in <em>AI video</em> this week.</h1>
+    <p class="lead">${total} niches for YouTube and Instagram. For each one: the biggest video of the week, what it can earn from ads, and the exact prompts to make it. The views are counted. The money is sourced.</p>
+    <div class="cta"><a class="btn big" href="#/" data-go="browse">Browse ${total} niches</a><button class="btn big ghost" data-go="pricing">See Pro · ₹${PRICE}/month</button></div>`;
   return `
   <div class="hero">
     <div class="kicker"><i class="dot"></i>Scanned ${esc(fmtDate(LIVE.updated || CAT.updated || new Date().toISOString().slice(0, 10)))} · updates every Monday</div>
-    <h1>What is working in <em>AI video</em> this week.</h1>
-    <p class="lead">${total} niches for YouTube and Instagram. For each one: the biggest video of the week, what it can earn from ads, and the exact prompts to make it. The views are counted. The money is sourced.</p>
-    <div class="cta"><a class="btn big" href="#/" data-go="browse">Browse ${total} niches</a><button class="btn big ghost" data-go="pricing">See Pro · ₹${PRICE}/month</button></div>
+    ${heroMain}
     <div class="stats">
       <div class="stat"><b>${total}</b><span>niches in the scan</span></div>
       <div class="stat"><b>${withTop}</b><span>with a top video this week</span></div>
