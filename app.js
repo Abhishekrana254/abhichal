@@ -232,7 +232,8 @@ async function finishPayment(resp) {
     await refreshMe(); paintChip();
     try { if (window.gtag) gtag("event", "conversion", { send_to: "AW-18550624955/oBsSCJ-No7AdELul0I1F", value: PRICE, currency: "INR", transaction_id: String(resp.razorpay_payment_id || "") }); } catch (_) {}
     const em = esc(r.email || (ME && ME.email) || "");
-    const rk = r.recoveryKey ? `<p class="sub">Save this access code somewhere safe: <code>${esc(r.recoveryKey)}</code></p>` : "";
+    if (r.recoveryKey) store.set("fm_rk", r.recoveryKey); // kept in this browser too, shown in Account
+    const rk = r.recoveryKey ? `<p class="sub">Your access code (screenshot it or keep it): <code style="user-select:all">${esc(r.recoveryKey)}</code></p>` : "";
     modal(`<h3>You are in. Welcome to Pro.</h3><p class="sub">Every lesson is open for the next 30 days. Nothing renews by itself.</p>${rk}<p class="sub">Next time on another device: sign in with <b>${em}</b> (Continue with Google works with the same email).</p><button class="btn big" data-close>Open my lessons</button>`);
     route();
   } catch (e) {
@@ -285,7 +286,7 @@ function accountModal() {
       <button class="btn ghost" id="a-out">Sign out</button>
     </div>
     <p class="msg"></p>
-    <p class="fine">On another phone or computer, press Sign in with this email.</p>`, (d) => {
+    <p class="fine">On another phone or computer, press Sign in with this email.</p>${store.get("fm_rk") ? `<p class="fine">Your access code: <code style="user-select:all">${esc(store.get("fm_rk"))}</code></p>` : ""}`, (d) => {
     fld(d, "a-out").onclick = signOut;
     const c = fld(d, "a-cancel");
     if (c) c.onclick = async () => {
