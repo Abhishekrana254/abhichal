@@ -1,6 +1,6 @@
 "use strict";
 
-const PRICE = 149;
+const PRICE = 49; // one-time 30-day pass, no auto-renewal
 const INR_PER_USD = 96.7; // US Federal Reserve H.10, 9 Oct 2026, as quoted by fluxnote.io
 const SHORTS_RPM = { us: 0.328, in: 0.008 }; // US$ per 1,000 views, AIR Media-Tech partner data
 const INDIA_LONG_FACTOR = 0.74 / 14.67; // MilX long-form CPM, India vs US
@@ -165,15 +165,15 @@ function buyModal(again) {
   if (!again) track("buy_click");
   const loggedIn = Boolean(ME);
   modal(`<h3>Formatly Pro</h3>
-    <p class="sub" style="margin-top:0">₹${PRICE} now, then ₹${PRICE} every month until you cancel. Cancel in one click from your account. You keep access until the month you paid for ends.</p>
+    <p class="sub" style="margin-top:0">₹${PRICE} one time for 30 days of every lesson. No auto-renewal and no UPI AutoPay: you pay once, and extend only if you want to.</p>
     ${loggedIn
     ? `<p class="sub">Paying as <b>${esc(ME.email)}</b>. <button class="link" id="b-switch">Not you?</button></p>`
     : `<label>Name (optional)<input id="b-name" type="text" autocomplete="name" maxlength="60"></label>
     <label>Email<input id="b-email" type="email" autocomplete="email" placeholder="you@gmail.com" required></label>
     <p class="fine">Pay first — no sign-in needed. Lessons open right after payment. Come back anytime with this email or Google.</p>`}
-    <label class="check"><input id="b-agree" type="checkbox"><span>I agree to the <a href="terms.html" target="_blank" rel="noopener">terms</a> and the <a href="privacy.html" target="_blank" rel="noopener">privacy policy</a>, and that Razorpay will charge ₹${PRICE} every month (UPI AutoPay or card) until I cancel.</span></label>
+    <label class="check"><input id="b-agree" type="checkbox"><span>I agree to the <a href="terms.html" target="_blank" rel="noopener">terms</a> and the <a href="privacy.html" target="_blank" rel="noopener">privacy policy</a>, and that this is a one-time payment of ₹${PRICE} for 30 days of access. It does not renew by itself.</span></label>
     <p class="msg"></p>
-    <button class="btn big" id="b-go">Continue to payment</button>
+    <button class="btn big" id="b-go">Pay ₹${PRICE} · UPI or card</button>
     <p class="fine">Payments run on Razorpay. We never see your card or UPI PIN.</p>
     ${loggedIn ? "" : `<p class="fine" style="text-align:center;margin-top:12px">Already paid or have an account? <button class="link" id="b-signin">Sign in</button></p>`}`, (d) => {
     if (loggedIn) fld(d, "b-switch").onclick = () => { signOut(); buyModal(true); };
@@ -190,7 +190,7 @@ function buyModal(again) {
       if (!fld(d, "b-agree").checked) return say(d, "Please tick the box to continue.", true);
       fld(d, "b-go").disabled = true; say(d, "Creating your secure checkout…");
       try {
-        const c = await api("/api/checkout", { method: "POST", body: JSON.stringify({ email, name, agree: true, vid: visitorId(), src: sourceNow() }) });
+        const c = await api("/api/checkout", { method: "POST", body: JSON.stringify({ email, name, agree: true, plan: "pass", vid: visitorId(), src: sourceNow() }) });
         await openRazorpay(c, d);
       } catch (e) {
         fld(d, "b-go").disabled = false;
@@ -215,7 +215,7 @@ async function openRazorpay(c, d) {
   }
   if (!window.Razorpay) throw new Error("Could not load the payment window. Check your connection and try again.");
   const rz = new Razorpay({
-    key: c.key, subscription_id: c.subscription_id, name: "Formatly", description: c.description,
+    key: c.key, ...(c.order_id ? { order_id: c.order_id, amount: c.amount, currency: "INR" } : { subscription_id: c.subscription_id }), name: "Formatly", description: c.description,
     prefill: { email: c.email }, theme: { color: "#d7ff3f" },
     modal: { ondismiss() { track("checkout_dismiss"); if (d) { fld(d, "b-go").disabled = false; say(d, ""); } } },
     async handler(resp) { await finishPayment(resp); }
@@ -227,13 +227,13 @@ async function openRazorpay(c, d) {
 async function finishPayment(resp) {
   modal(`<h3>Confirming your payment…</h3><p class="sub">This takes a few seconds. Please do not close this page.</p>`);
   try {
-    const r = await api("/api/verify", { method: "POST", body: JSON.stringify({ razorpay_payment_id: resp.razorpay_payment_id, razorpay_subscription_id: resp.razorpay_subscription_id, razorpay_signature: resp.razorpay_signature }) });
+    const r = await api("/api/verify", { method: "POST", body: JSON.stringify({ razorpay_payment_id: resp.razorpay_payment_id, razorpay_subscription_id: resp.razorpay_subscription_id, razorpay_order_id: resp.razorpay_order_id, razorpay_signature: resp.razorpay_signature }) });
     store.set(TOKEN_KEY, r.token);
     await refreshMe(); paintChip();
     try { if (window.gtag) gtag("event", "conversion", { send_to: "AW-18550624955/oBsSCJ-No7AdELul0I1F", value: PRICE, currency: "INR", transaction_id: String(resp.razorpay_payment_id || "") }); } catch (_) {}
     const em = esc(r.email || (ME && ME.email) || "");
     const rk = r.recoveryKey ? `<p class="sub">Save this access code somewhere safe: <code>${esc(r.recoveryKey)}</code></p>` : "";
-    modal(`<h3>You are in. Welcome to Pro.</h3><p class="sub">Every lesson is open now.</p>${rk}<p class="sub">Next time on another device: sign in with <b>${em}</b> (Continue with Google works with the same email).</p><button class="btn big" data-close>Open my lessons</button>`);
+    modal(`<h3>You are in. Welcome to Pro.</h3><p class="sub">Every lesson is open for the next 30 days. Nothing renews by itself.</p>${rk}<p class="sub">Next time on another device: sign in with <b>${em}</b> (Continue with Google works with the same email).</p><button class="btn big" data-close>Open my lessons</button>`);
     route();
   } catch (e) {
     modal(`<h3>Payment received, access is pending</h3><p class="sub">${esc(e.message)}</p><p class="sub">Your payment ID: <code>${esc(resp.razorpay_payment_id || "")}</code>. Keep it. Sign in again in a minute, or contact us and we will fix it the same day.</p><div class="row"><button class="btn" data-restore>Sign in</button><button class="btn ghost" data-contact>Contact us</button></div>`);
@@ -275,12 +275,12 @@ function signInModal(then, mode) {
 const restoreModal = () => signInModal();
 function accountModal() {
   if (!ME) return restoreModal();
-  const st = ME.cancelRequested ? "Cancelled. Access ends " + fmtDate(new Date(ME.paidUntil)) : paid() ? (ME.renewsAt ? "Renews on " + fmtDate(new Date(ME.renewsAt)) : "Active until " + fmtDate(new Date(ME.paidUntil))) : hadPlan() ? "Access ended " + fmtDate(new Date(ME.paidUntil)) : "Signed in. Pro starts after you pay.";
+  const st = ME.cancelRequested ? "Cancelled. Access ends " + fmtDate(new Date(ME.paidUntil)) : paid() ? (ME.renewsAt ? "Renews on " + fmtDate(new Date(ME.renewsAt)) : "Active until " + fmtDate(new Date(ME.paidUntil)) + (ME.plan === "pass" ? " (no auto-renewal)" : "")) : hadPlan() ? "Access ended " + fmtDate(new Date(ME.paidUntil)) : "Signed in. Pro starts after you pay.";
   modal(`<h3>Your account</h3>
-    <dl class="acct"><div><dt>Email</dt><dd>${esc(ME.email)}</dd></div><div><dt>Plan</dt><dd>${hadPlan() || paid() ? "Formatly Pro, ₹" + PRICE + " a month" : "None yet"}</dd></div><div><dt>Status</dt><dd>${esc(st)}</dd></div>${hadPlan() ? `<div><dt>Months paid</dt><dd>${ME.paidCount || 0}</dd></div>` : ""}</dl>
+    <dl class="acct"><div><dt>Email</dt><dd>${esc(ME.email)}</dd></div><div><dt>Plan</dt><dd>${hadPlan() || paid() ? (ME.plan === "pass" ? "Formatly Pass, ₹" + PRICE + " for 30 days" : "Formatly Pro, ₹149 a month") : "None yet"}</dd></div><div><dt>Status</dt><dd>${esc(st)}</dd></div>${hadPlan() && ME.plan !== "pass" ? `<div><dt>Months paid</dt><dd>${ME.paidCount || 0}</dd></div>` : ""}</dl>
     <div class="row">
-      ${paid() && !ME.cancelRequested ? '<button class="btn ghost" id="a-cancel">Cancel renewal</button>' : ""}
-      ${!paid() ? `<button class="btn" data-buy>${hadPlan() ? "Renew" : "Unlock"} · ₹${PRICE}/month</button>` : ""}
+      ${paid() && !ME.cancelRequested && ME.plan !== "pass" ? '<button class="btn ghost" id="a-cancel">Cancel renewal</button>' : ""}
+      ${!paid() || ME.plan === "pass" ? `<button class="btn" data-buy>${hadPlan() ? "Get 30 more days" : "Unlock"} · ₹${PRICE}</button>` : ""}
       <button class="btn ghost" data-contact>Contact us</button>
       <button class="btn ghost" id="a-out">Sign out</button>
     </div>
@@ -318,8 +318,8 @@ function contactModal(kind) {
 function paintChip() {
   const el = $("#passchip");
   if (!el) return;
-  if (ME) el.innerHTML = paid() ? '<button class="btn ok" data-account>Pro · Account</button>' : hadPlan() ? `<button class="btn" data-account>Renew · Account</button>` : `<button class="link" data-account>Account</button><button class="btn" data-buy>Unlock all · ₹${PRICE}/month</button>`;
-  else el.innerHTML = `<button class="link" data-restore>Sign in</button><button class="btn" data-buy>Unlock all · ₹${PRICE}/month</button>`;
+  if (ME) el.innerHTML = paid() ? '<button class="btn ok" data-account>Pro · Account</button>' : hadPlan() ? `<button class="btn" data-account>Renew · Account</button>` : `<button class="link" data-account>Account</button><button class="btn" data-buy>Unlock all · ₹${PRICE}</button>`;
+  else el.innerHTML = `<button class="link" data-restore>Sign in</button><button class="btn" data-buy>Unlock all · ₹${PRICE}</button>`;
   paintInstall();
 }
 
@@ -523,11 +523,11 @@ function homeHTML() {
   const fromAd = /[?&](gclid=|utm_source=(google|instagram))/.test(location.search);
   const heroMain = fromAd
     ? `<h1>Copy-paste <em>AI video prompts</em> that already got millions of views.</h1>
-    <p class="lead">Pick a viral AI format, copy its master prompt, and paste it into Google Flow, Veo or ChatGPT. This is not a video generator: it is the prompts and steps that make the video in your own tool. The full AI baby comedy lesson with 3 master prompts is free. Pro is ₹${PRICE}/month for all ${total} niches.</p>
-    <div class="cta"><a class="btn big" href="#/n/ai-baby-comedy">Open the free lesson</a><button class="btn big ghost" data-go="pricing">See Pro · ₹${PRICE}/month</button></div>`
+    <p class="lead">Pick a viral AI format, copy its master prompt, and paste it into Google Flow, Veo or ChatGPT. This is not a video generator: it is the prompts and steps that make the video in your own tool. The full AI baby comedy lesson with 3 master prompts is free. Pro is a one-time ₹${PRICE} for 30 days of all ${total} niches.</p>
+    <div class="cta"><a class="btn big" href="#/n/ai-baby-comedy">Open the free lesson</a><button class="btn big ghost" data-go="pricing">See Pro · ₹${PRICE}</button></div>`
     : `<h1>What is working in <em>AI video</em> this week.</h1>
     <p class="lead">${total} niches for YouTube and Instagram. For each one: the biggest video of the week, what it can earn from ads, and the exact prompts to make it. The views are counted. The money is sourced.</p>
-    <div class="cta"><a class="btn big" href="#/" data-go="browse">Browse ${total} niches</a><button class="btn big ghost" data-go="pricing">See Pro · ₹${PRICE}/month</button></div>`;
+    <div class="cta"><a class="btn big" href="#/" data-go="browse">Browse ${total} niches</a><button class="btn big ghost" data-go="pricing">See Pro · ₹${PRICE}</button></div>`;
   return `
   <div class="hero">
     <div class="kicker"><i class="dot"></i>Scanned ${esc(fmtDate(LIVE.updated || CAT.updated || new Date().toISOString().slice(0, 10)))} · updates every Monday</div>
@@ -591,11 +591,11 @@ function homeHTML() {
   </section>
 
   <section id="pricing">
-    <div class="sec-h"><div><h2>Pro, ₹${PRICE} a month</h2><p class="sub">Look around for free. Pay when you want to make the videos.</p></div></div>
+    <div class="sec-h"><div><h2>Pro, ₹${PRICE} for 30 days</h2><p class="sub">Look around for free. Pay when you want to make the videos.</p></div></div>
     <div class="price">
       <div class="plan pro">
         <h3>Pro</h3>
-        <div class="p">₹${PRICE}<small> / month</small></div>
+        <div class="p">₹${PRICE}<small> / 30 days, one time</small></div>
         <ul>
           <li>${recipes} deep recipes for the AI formats that are working (horror, myth, baby comedy and more): a master prompt for ChatGPT that writes your Google Flow prompts</li>
           <li>Character lock and voice lock blocks so the same cast and voice come back every episode</li>
@@ -603,8 +603,8 @@ function homeHTML() {
           <li>${new Set(CAT.niches.map((x) => x.style)).size} format playbooks, each with its own master prompt, that cover every other niche (${total} in all). Finance, health, tech, food, DIY and the rest are made as explainers, how-tos, news roundups and so on, and each playbook says how.</li>
           <li>Each lesson lists the sources it was researched from, and the platform rules that apply</li>
         </ul>
-        ${paid() ? '<button class="btn big ghost" data-account>Pro is on · Account</button>' : `<button class="btn big" data-buy>Unlock · ₹${PRICE}/month</button>`}
-        <p class="fine">₹${PRICE} every month by UPI AutoPay or card, through Razorpay. Cancel anytime in your account and keep access to the end of the month you paid for. <a href="terms.html">Terms</a> and <a href="refund.html">refunds</a>.</p>
+        ${paid() ? '<button class="btn big ghost" data-account>Pro is on · Account</button>' : `<button class="btn big" data-buy>Unlock · ₹${PRICE}</button>`}
+        <p class="fine">Pay ₹${PRICE} once by UPI or card, through Razorpay. You get 30 days of access. There is no auto-renewal and no mandate; extend only if you want more time. <a href="terms.html">Terms</a> and <a href="refund.html">refunds</a>.</p>
       </div>
       <div class="plan free">
         <h3>Free</h3>
@@ -626,8 +626,8 @@ function homeHTML() {
       <details><summary>How is "this week" measured?</summary><p>Every Monday a script runs a YouTube search for each niche, limited to videos uploaded that week and sorted by views, and records the top three. Where a result does not look like the niche, the page marks it as a loose match. Instagram has no public counters, so Instagram fit is a judgement about the format, not a measurement.</p></details>
       <details><summary>Does Instagram pay per view in India?</summary><p>No. Instagram's own help page says its bonus programs are invite-only and run in the US, South Korea, and Japan. In India, money comes from gifts, subscriptions (10,000 followers), brand deals, affiliate links, or selling your own product. Views are how you reach those.</p></details>
       <details><summary>Will I get these views?</summary><p>No promise. A top video this week shows what an audience is watching. It does not say what a new channel will get.</p></details>
-      <details><summary>Does Pro renew by itself? How do I cancel?</summary><p>Yes. Pro is ₹149 a month and renews on its own through Razorpay (UPI AutoPay or card). Open Account, press Cancel renewal, and the next charge does not happen. The month you already paid for is not refunded. You keep access until that month ends. Razorpay may ask you to approve the mandate in your UPI app the first time.</p></details>
-      <details><summary>Can I get a refund?</summary><p>No. Cancel stops future charges only. The ₹149 already taken stays, and access stays until that month ends.</p></details>
+      <details><summary>Does Pro renew by itself?</summary><p>No. The ₹49 pass is a single payment for 30 days. There is no UPI AutoPay mandate and nothing is charged again. When the 30 days end, access ends; buy another pass if you want more time. Members who joined earlier on the ₹149 monthly plan can still cancel that renewal in Account.</p></details>
+      <details><summary>Can I get a refund?</summary><p>No. The lessons open the moment you pay, so the ₹49 is not returned. Nothing is charged again, so there is nothing to cancel.</p></details>
       <details><summary>How do I sign in on another phone or computer?</summary><p>Press Sign in and use the same Google account, or the same email and password, that you paid with.</p></details>
       <details><summary>I paid but I have no access</summary><p>Press Sign in and use the same Google account, or the same email and password, that you paid with. If that still fails, use Contact us at the bottom of the page and include the payment ID from your receipt. We fix it the same day.</p></details>
       <details><summary>What do you store about me?</summary><p>Your email, name and the phone number Razorpay shares, your subscription status, and anonymous page counts. No card or UPI details ever reach us. See the <a href="privacy.html">privacy policy</a>.</p></details>
@@ -695,7 +695,7 @@ function lockedLesson(n, why) {
   return `<div class="cols locked">
       <div class="panel ghost"><h3>How to make it</h3><ol class="steps">${Array.from({ length: 6 }, () => "<li>Placeholder line that stays hidden until you are a Pro member, six steps in all.</li>").join("")}</ol></div>
       <div class="panel ghost"><h3>Master prompt</h3><div class="prompt"><header><b>1. Master prompt</b></header><pre>Placeholder text that stays hidden until you are a Pro member. The real prompt is not in this page.</pre></div><div class="prompt"><pre>Placeholder text.</pre></div></div>
-      <div class="gate"><div class="gate-box"><span class="badge b-F">Pro</span><b>${isRecipe ? "Full recipe, master prompt and locks" : "Full playbook and master prompt"}</b><p>${!isRecipe && STYLE_TITLE[n.style] ? "This niche is made with the “" + esc(STYLE_TITLE[n.style]) + "” playbook, with " + esc(n.name) + " filled in for you. " : ""}${why ? esc(why) + " " : ""}${isRecipe ? "The ChatGPT master prompt, the character and voice locks, the Flow settings, the checklist and the sources" : "The ChatGPT master prompt, the step-by-step plan, the tools, the checklist and the sources"} for ${esc(n.name)}. ₹${PRICE} a month, cancel anytime.</p><button class="btn big" data-buy>Unlock · ₹${PRICE}/month</button><button class="link" data-restore>Already paid? Sign in</button></div></div>
+      <div class="gate"><div class="gate-box"><span class="badge b-F">Pro</span><b>${isRecipe ? "Full recipe, master prompt and locks" : "Full playbook and master prompt"}</b><p>${!isRecipe && STYLE_TITLE[n.style] ? "This niche is made with the “" + esc(STYLE_TITLE[n.style]) + "” playbook, with " + esc(n.name) + " filled in for you. " : ""}${why ? esc(why) + " " : ""}${isRecipe ? "The ChatGPT master prompt, the character and voice locks, the Flow settings, the checklist and the sources" : "The ChatGPT master prompt, the step-by-step plan, the tools, the checklist and the sources"} for ${esc(n.name)}. ₹${PRICE} one time for 30 days, no auto-renewal.</p><button class="btn big" data-buy>Unlock · ₹${PRICE}</button><button class="link" data-restore>Already paid? Sign in</button></div></div>
     </div>`;
 }
 async function hydrateLesson(n) {

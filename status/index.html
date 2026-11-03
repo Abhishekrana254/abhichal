@@ -37,7 +37,7 @@ async function load(){
   try{
     const [ads,st]=await Promise.all([get("ads"),get("stats&days=7")]);$("login").hidden=true;
     const ch=(st.channels||[]);const g=ch.filter(x=>/^google/i.test(x.src));const sum=(a,k)=>a.reduce((s,x)=>s+(x[k]||0),0);
-    const gPaid=sum(g,"paid"),gSpend=ads.total?ads.total.cost:0,gRev=gPaid*149;
+    const gPaid=sum(g,"paid"),gSpend=ads.total?ads.total.cost:0,gRev=gPaid*49;
     let h="";
     if(ads.empty){h+=`<div class="card"><h2>Ads</h2>No snapshot yet. It appears within 30 minutes.</div>`}
     else{

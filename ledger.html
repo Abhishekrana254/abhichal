@@ -19,7 +19,7 @@
   <header class="nav"><div class="wrap"><a class="logo" href="./"><i></i>Formatly</a></div></header>
   <main class="wrap box">
     <h2>Ledger</h2>
-    <p class="sub">Your own page. Type today's ad spend, visits, and ₹149 purchases from the Razorpay dashboard. Scale only if payback stays at 100% or more. Saved in this browser only.</p>
+    <p class="sub">Your own page. Type today's ad spend, visits, and ₹49 purchases from the Razorpay dashboard. Scale only if payback stays at 100% or more. Saved in this browser only.</p>
     <label>Ad spend today ₹ <input id="spend" inputmode="numeric" placeholder="100" /></label>
     <label>Visits <input id="visits" inputmode="numeric" placeholder="0" /></label>
     <label>Purchases <input id="buys" inputmode="numeric" placeholder="0" /></label>
@@ -30,11 +30,11 @@
   <script>
     const LOG = "abhichal-hisab";
     const rows = () => { try { return JSON.parse(localStorage.getItem(LOG) || "[]"); } catch { return []; } };
-    const back = (r) => (r.spend ? Math.round((r.buys * 149 / r.spend) * 100) : 0);
+    const back = (r) => (r.spend ? Math.round((r.buys * 49 / r.spend) * 100) : 0);
     function paint() {
       document.getElementById("log").innerHTML = rows().map((r) => {
         const b = back(r);
-        return `<div class="row"><span>${r.day}</span><span class="${b >= 100 ? "good" : "bad"}">${b}% · ₹${r.buys * 149} / ₹${r.spend}</span></div>`;
+        return `<div class="row"><span>${r.day}</span><span class="${b >= 100 ? "good" : "bad"}">${b}% · ₹${r.buys * 49} / ₹${r.spend}</span></div>`;
       }).join("");
     }
     document.getElementById("save").onclick = () => {
@@ -45,7 +45,7 @@
       const list = rows().filter((r) => r.day !== day);
       list.unshift({ day, spend, visits, buys });
       localStorage.setItem(LOG, JSON.stringify(list.slice(0, 30)));
-      const b = spend ? Math.round((buys * 149 / spend) * 100) : 0;
+      const b = spend ? Math.round((buys * 49 / spend) * 100) : 0;
       document.getElementById("result").innerHTML = `<p class="${b >= 100 ? "good" : "bad"}">${b >= 100 ? b + "% back. Keep the budget, or raise it a little." : b + "% back. Under 100%. Do not raise the budget."}</p>`;
       paint();
     };
