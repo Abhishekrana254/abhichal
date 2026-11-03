@@ -149,7 +149,7 @@ async function enter(d, r) {
 }
 async function acceptGoogle(d, credential) {
   say(d, "Signing in with Google…");
-  await enter(d, await api("/api/auth", { method: "POST", body: JSON.stringify({ mode: "google", credential }) }));
+  await enter(d, await api("/api/auth", { method: "POST", body: JSON.stringify({ mode: "google", credential, vid: visitorId(), src: sourceNow() }) }));
 }
 function mountGoogle(d) {
   const slot = $(".gbtn", d);
@@ -163,23 +163,46 @@ function mountGoogle(d) {
 
 function buyModal(again) {
   if (!again) track("buy_click");
-  if (!ME) return signInModal("buy");
+  const loggedIn = Boolean(ME);
   modal(`<h3>Formatly Pro</h3>
     <p class="sub" style="margin-top:0">₹${PRICE} now, then ₹${PRICE} every month until you cancel. Cancel in one click from your account. You keep access until the month you paid for ends.</p>
-    <p class="sub">Paying as <b>${esc(ME.email)}</b>. <button class="link" id="b-switch">Not you?</button></p>
+    ${loggedIn
+    ? `<p class="sub">Paying as <b>${esc(ME.email)}</b>. <button class="link" id="b-switch">Not you?</button></p>`
+    : `<label>Name (optional)<input id="b-name" type="text" autocomplete="name" maxlength="60"></label>
+    <label>Email<input id="b-email" type="email" autocomplete="email" placeholder="you@gmail.com" required></label>
+    <p class="fine">Pay first — no sign-in needed. Lessons open right after payment. Come back anytime with this email or Google.</p>`}
     <label class="check"><input id="b-agree" type="checkbox"><span>I agree to the <a href="terms.html" target="_blank" rel="noopener">terms</a> and the <a href="privacy.html" target="_blank" rel="noopener">privacy policy</a>, and that Razorpay will charge ₹${PRICE} every month (UPI AutoPay or card) until I cancel.</span></label>
     <p class="msg"></p>
     <button class="btn big" id="b-go">Continue to payment</button>
-    <p class="fine">Payments run on Razorpay. We never see your card or UPI PIN.</p>`, (d) => {
-    fld(d, "b-switch").onclick = () => { signOut(); signInModal("buy"); };
-    fld(d, "b-go").onclick = async () => {
+    <p class="fine">Payments run on Razorpay. We never see your card or UPI PIN.</p>
+    ${loggedIn ? "" : `<p class="fine" style="text-align:center;margin-top:12px">Already paid or have an account? <button class="link" id="b-signin">Sign in</button></p>`}`, (d) => {
+    if (loggedIn) fld(d, "b-switch").onclick = () => { signOut(); buyModal(true); };
+    else {
+      const si = fld(d, "b-signin");
+      if (si) si.onclick = () => signInModal("buy");
+      const em = fld(d, "b-email");
+      if (em) em.focus();
+    }
+    const startPay = async () => {
+      const email = loggedIn ? ME.email : fld(d, "b-email").value.trim().toLowerCase();
+      const name = loggedIn ? (ME.name || "") : (fld(d, "b-name") ? fld(d, "b-name").value.trim() : "");
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return say(d, "Enter a valid email address.", true);
       if (!fld(d, "b-agree").checked) return say(d, "Please tick the box to continue.", true);
       fld(d, "b-go").disabled = true; say(d, "Creating your secure checkout…");
       try {
-        const c = await api("/api/checkout", { method: "POST", body: JSON.stringify({ email: ME.email, name: ME.name || "", agree: true, vid: visitorId(), src: sourceNow() }) });
+        const c = await api("/api/checkout", { method: "POST", body: JSON.stringify({ email, name, agree: true, vid: visitorId(), src: sourceNow() }) });
         await openRazorpay(c, d);
-      } catch (e) { fld(d, "b-go").disabled = false; say(d, e.message, true); }
+      } catch (e) {
+        fld(d, "b-go").disabled = false;
+        if (e.status === 409) {
+          say(d, e.message + " Sign in, then pay again.", true);
+          setTimeout(() => signInModal("buy"), 1200);
+        } else say(d, e.message, true);
+      }
     };
+    fld(d, "b-go").onclick = startPay;
+    const em = fld(d, "b-email");
+    if (em) em.addEventListener("keydown", (ev) => { if (ev.key === "Enter") startPay(); });
   });
 }
 async function openRazorpay(c, d) {
@@ -208,7 +231,9 @@ async function finishPayment(resp) {
     store.set(TOKEN_KEY, r.token);
     await refreshMe(); paintChip();
     try { if (window.gtag) gtag("event", "conversion", { send_to: "AW-18550624955/oBsSCJ-No7AdELul0I1F", value: PRICE, currency: "INR", transaction_id: String(resp.razorpay_payment_id || "") }); } catch (_) {}
-    modal(`<h3>You are in. Welcome to Pro.</h3><p class="sub">Every lesson is open now. Next time, press Sign in with <b>${esc(ME ? ME.email : "")}</b>.</p><button class="btn big" data-close>Open my lessons</button>`);
+    const em = esc(r.email || (ME && ME.email) || "");
+    const rk = r.recoveryKey ? `<p class="sub">Save this access code somewhere safe: <code>${esc(r.recoveryKey)}</code></p>` : "";
+    modal(`<h3>You are in. Welcome to Pro.</h3><p class="sub">Every lesson is open now.</p>${rk}<p class="sub">Next time on another device: sign in with <b>${em}</b> (Continue with Google works with the same email).</p><button class="btn big" data-close>Open my lessons</button>`);
     route();
   } catch (e) {
     modal(`<h3>Payment received, access is pending</h3><p class="sub">${esc(e.message)}</p><p class="sub">Your payment ID: <code>${esc(resp.razorpay_payment_id || "")}</code>. Keep it. Sign in again in a minute, or contact us and we will fix it the same day.</p><div class="row"><button class="btn" data-restore>Sign in</button><button class="btn ghost" data-contact>Contact us</button></div>`);
@@ -217,7 +242,7 @@ async function finishPayment(resp) {
 function signInModal(then, mode) {
   const up = mode === "signup";
   modal(`<h3>${up ? "Create your account" : "Sign in"}</h3>
-    <p class="sub" style="margin-top:0">${then === "buy" ? "Sign in to unlock Pro. " : ""}${up ? "Already have an account?" : "New here?"} <button class="link" id="s-flip">${up ? "Sign in" : "Create an account"}</button></p>
+    <p class="sub" style="margin-top:0">${then === "buy" ? "Sign in to continue checkout for this email. " : ""}${up ? "Already have an account?" : "New here?"} <button class="link" id="s-flip">${up ? "Sign in" : "Create an account"}</button>${then === "buy" ? ` · <button class="link" id="s-back-buy">Back to pay without signing in</button>` : ""}</p>
     <div class="gbtn"></div>
     <p class="fine" style="text-align:center;margin:10px 0">or use your email</p>
     ${up ? '<label>Name (optional)<input id="s-name" type="text" autocomplete="name" maxlength="60"></label>' : ""}
@@ -229,6 +254,8 @@ function signInModal(then, mode) {
     if (then) d.dataset.then = then;
     mountGoogle(d);
     fld(d, "s-flip").onclick = () => signInModal(then, up ? "login" : "signup");
+    const back = fld(d, "s-back-buy");
+    if (back) back.onclick = () => buyModal(true);
     const go = async () => {
       const email = fld(d, "s-email").value.trim(), password = fld(d, "s-pw").value;
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return say(d, "Enter a valid email address.", true);
@@ -668,7 +695,7 @@ function lockedLesson(n, why) {
   return `<div class="cols locked">
       <div class="panel ghost"><h3>How to make it</h3><ol class="steps">${Array.from({ length: 6 }, () => "<li>Placeholder line that stays hidden until you are a Pro member, six steps in all.</li>").join("")}</ol></div>
       <div class="panel ghost"><h3>Master prompt</h3><div class="prompt"><header><b>1. Master prompt</b></header><pre>Placeholder text that stays hidden until you are a Pro member. The real prompt is not in this page.</pre></div><div class="prompt"><pre>Placeholder text.</pre></div></div>
-      <div class="gate"><div class="gate-box"><span class="badge b-F">Pro</span><b>${isRecipe ? "Full recipe, master prompt and locks" : "Full playbook and master prompt"}</b><p>${!isRecipe && STYLE_TITLE[n.style] ? "This niche is made with the “" + esc(STYLE_TITLE[n.style]) + "” playbook, with " + esc(n.name) + " filled in for you. " : ""}${why ? esc(why) + " " : ""}${isRecipe ? "The ChatGPT master prompt, the character and voice locks, the Flow settings, the checklist and the sources" : "The ChatGPT master prompt, the step-by-step plan, the tools, the checklist and the sources"} for ${esc(n.name)}. ₹${PRICE} a month, cancel anytime.</p><button class="btn big" data-buy>Unlock · ₹${PRICE}/month</button><button class="link" data-restore>Sign in or create an account</button></div></div>
+      <div class="gate"><div class="gate-box"><span class="badge b-F">Pro</span><b>${isRecipe ? "Full recipe, master prompt and locks" : "Full playbook and master prompt"}</b><p>${!isRecipe && STYLE_TITLE[n.style] ? "This niche is made with the “" + esc(STYLE_TITLE[n.style]) + "” playbook, with " + esc(n.name) + " filled in for you. " : ""}${why ? esc(why) + " " : ""}${isRecipe ? "The ChatGPT master prompt, the character and voice locks, the Flow settings, the checklist and the sources" : "The ChatGPT master prompt, the step-by-step plan, the tools, the checklist and the sources"} for ${esc(n.name)}. ₹${PRICE} a month, cancel anytime.</p><button class="btn big" data-buy>Unlock · ₹${PRICE}/month</button><button class="link" data-restore>Already paid? Sign in</button></div></div>
     </div>`;
 }
 async function hydrateLesson(n) {
