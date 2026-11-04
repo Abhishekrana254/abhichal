@@ -118,18 +118,24 @@ function signOut() {
 
 /* ---------- modals ---------- */
 function closeModal() { const m = $("#modal"); if (m) { m.remove(); document.body.classList.remove("noscroll"); } }
-function modal(html, onMount) {
+function modal(html, onMount, opts) {
+  opts = opts || {};
   closeModal();
   const d = document.createElement("div");
   d.className = "modal"; d.id = "modal";
-  d.innerHTML = `<div class="modal-card" role="dialog" aria-modal="true"><button class="modal-x" aria-label="Close" data-close>×</button>${html}</div>`;
-  d.addEventListener("click", (e) => { if (e.target === d || e.target.closest("[data-close]")) closeModal(); });
+  const x = opts.noClose ? "" : '<button class="modal-x" aria-label="Close" data-close>×</button>';
+  d.innerHTML = `<div class="modal-card${opts.paywall ? " paywall" : ""}" role="dialog" aria-modal="true">${x}${html}</div>`;
+  d.addEventListener("click", (e) => {
+    if (opts.noClose) return;
+    if (e.target === d || e.target.closest("[data-close]")) closeModal();
+  });
   document.body.appendChild(d);
   document.body.classList.add("noscroll");
   if (onMount) onMount(d);
   const f = d.querySelector("input:not([type=checkbox]),textarea");
-  if (f) f.focus();
+  if (f && !opts.paywall) f.focus();
 }
+function trackBuyClick() { track("buy_click"); }
 const fld = (d, id) => $("#" + id, d);
 function say(d, msg, bad) { const m = $(".msg", d); if (m) { m.textContent = msg || ""; m.className = "msg" + (bad ? " bad" : ""); } }
 
@@ -145,7 +151,9 @@ async function enter(d, r) {
   store.set(TOKEN_KEY, r.token);
   await refreshMe(); paintChip(); route();
   if (paid()) { closeModal(); return; }
-  if (d && d.dataset && d.dataset.then === "buy") buyModal(true); else closeModal();
+  if (d && d.dataset && d.dataset.then === "buy") buyModal(true);
+  else if (!paid()) buyModal(false, { paywall: true });
+  else closeModal();
 }
 async function acceptGoogle(d, credential) {
   say(d, "Signing in with Google…");
@@ -161,11 +169,17 @@ function mountGoogle(d) {
   }).catch(() => { slot.remove(); });
 }
 
-function buyModal(again) {
-  if (!again) track("buy_click");
+function buyModal(again, opts) {
+  opts = opts || {};
+  const paywall = Boolean(opts.paywall && !again);
+  if (paywall) track("paywall");
   const loggedIn = Boolean(ME);
-  modal(`<h3>Formatly Pro</h3>
-    <p class="sub" style="margin-top:0">₹${PRICE} one time for 30 days of every lesson. No auto-renewal and no UPI AutoPay: you pay once, and extend only if you want to.</p>
+  const head = paywall
+    ? `<h3>Unlock Formatly Pro</h3>
+    <p class="sub" style="margin-top:0"><b style="color:#f5f5f4">Pay once · ₹${PRICE} · 30 days.</b> Every viral AI format: master prompts for Google Flow, character locks, step-by-step playbooks. No auto-renewal.</p>`
+    : `<h3>Formatly Pro</h3>
+    <p class="sub" style="margin-top:0">₹${PRICE} one time for 30 days of every lesson. No auto-renewal and no UPI AutoPay: you pay once, and extend only if you want to.</p>`;
+  modal(`${head}
     ${loggedIn
     ? `<p class="sub">Paying as <b>${esc(ME.email)}</b>. <button class="link" id="b-switch">Not you?</button></p>`
     : `<label>Name (optional)<input id="b-name" type="text" autocomplete="name" maxlength="60"></label>
@@ -188,6 +202,7 @@ function buyModal(again) {
       const name = loggedIn ? (ME.name || "") : (fld(d, "b-name") ? fld(d, "b-name").value.trim() : "");
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return say(d, "Enter a valid email address.", true);
       if (!fld(d, "b-agree").checked) return say(d, "Please tick the box to continue.", true);
+      trackBuyClick();
       fld(d, "b-go").disabled = true; say(d, "Creating your secure checkout…");
       try {
         const c = await api("/api/checkout", { method: "POST", body: JSON.stringify({ email, name, agree: true, plan: "pass", vid: visitorId(), src: sourceNow() }) });
@@ -203,7 +218,7 @@ function buyModal(again) {
     fld(d, "b-go").onclick = startPay;
     const em = fld(d, "b-email");
     if (em) em.addEventListener("keydown", (ev) => { if (ev.key === "Enter") startPay(); });
-  });
+  }, { noClose: paywall, paywall });
 }
 async function openRazorpay(c, d) {
   if (!window.Razorpay) {
@@ -332,7 +347,7 @@ function paintInstall() {
   // Offer the install after someone has paid, not on the first visit from an ad.
   b.hidden = standalone() || !paid() || !(deferredInstall || ios);
 }
-window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); deferredInstall = e; track("install_prompt"); paintInstall(); });
+window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); deferredInstall = e; if (paid()) track("install_prompt"); paintInstall(); });
 window.addEventListener("appinstalled", () => { track("installed"); deferredInstall = null; paintInstall(); });
 async function installApp() {
   if (deferredInstall) {
@@ -478,7 +493,7 @@ function bindCalc() {
 function card(n) {
   const lv = liveOf(n.id);
   const top = lv.top[0];
-  const lockMark = n.recipe === "baby" ? '<span class="free">Free lesson</span>' : paid() ? "" : '<span class="lock">Pro</span>';
+  const lockMark = paid() ? "" : '<span class="lock">Pro</span>';
   return `<a class="card" href="#/n/${n.id}">
     <div class="g"><span>${esc(CAT.groups[n.group].name)}</span><span class="badge b-${n.ai}">${AI_LABEL[n.ai]}</span></div>
     <h3>${esc(n.name)}</h3>
@@ -522,8 +537,8 @@ function homeHTML() {
   const fromAd = /[?&](gclid=|utm_source=(google|instagram))/.test(location.search);
   const heroMain = fromAd
     ? `<h1>Copy-paste <em>AI video prompts</em> that already got millions of views.</h1>
-    <p class="lead">Pick a viral AI format, copy its master prompt, and paste it into Google Flow, Veo or ChatGPT. This is not a video generator: it is the prompts and steps that make the video in your own tool. The full AI baby comedy lesson with 3 master prompts is free. Pro is a one-time ₹${PRICE} for 30 days of all ${total} niches.</p>
-    <div class="cta"><a class="btn big" href="#/n/ai-baby-comedy">Open the free lesson</a><button class="btn big ghost" data-go="pricing">See Pro · ₹${PRICE}</button></div>`
+    <p class="lead">Master prompts for Google Flow and Veo, character locks, and step-by-step playbooks for every viral AI format. One payment · ₹${PRICE} · 30 days · no auto-renewal.</p>
+    <div class="cta"><button class="btn big" data-buy>Unlock all · ₹${PRICE}</button></div>`
     : `<h1>What is working in <em>AI video</em> this week.</h1>
     <p class="lead">${total} niches for YouTube and Instagram. For each one: the biggest video of the week, what it can earn from ads, and the exact prompts to make it. The views are counted. The money is sourced.</p>
     <div class="cta"><a class="btn big" href="#/" data-go="browse">Browse ${total} niches</a><button class="btn big ghost" data-go="pricing">See Pro · ₹${PRICE}</button></div>`;
@@ -606,13 +621,12 @@ function homeHTML() {
         <p class="fine">Pay ₹${PRICE} once by UPI or card, through Razorpay. You get 30 days of access. There is no auto-renewal and no mandate; extend only if you want more time. <a href="terms.html">Terms</a> and <a href="refund.html">refunds</a>.</p>
       </div>
       <div class="plan free">
-        <h3>Free</h3>
-        <div class="p">₹0</div>
+        <h3>Before you pay</h3>
+        <div class="p">Preview only</div>
         <ul>
-          <li>All ${total} niches with this week's top videos</li>
+          <li>See which AI formats are trending this week</li>
           <li>Earnings calculator with sourced rates</li>
-          <li>The AI baby comedy lesson in full, with its three master prompts</li>
-          <li>Instagram and Shorts reality checks</li>
+          <li>Full lessons and copy-paste prompts unlock after payment</li>
         </ul>
       </div>
     </div>
@@ -700,7 +714,7 @@ function lockedLesson(n, why) {
 async function hydrateLesson(n) {
   const slot = $("#lesson-slot");
   if (!slot) return;
-  if (n.recipe === "baby") { slot.innerHTML = lessonBody(FREE, n); bindCopy(); return; }
+  if (n.recipe === "baby") { slot.innerHTML = lockedLesson(n); return; }
   if (!paid()) { slot.innerHTML = lockedLesson(n); return; }
   slot.innerHTML = '<p class="sub" style="padding:30px 0">Loading your lesson…</p>';
   const id = n.recipe || n.style;
@@ -737,7 +751,7 @@ function nicheHTML(n) {
   return `
   <a class="back" href="#/">← All niches</a>
   <div class="d-head">
-    <div class="g" style="display:flex;gap:10px;align-items:center"><span class="badge b-${n.ai}">${AI_LABEL[n.ai]}</span><span class="sub" style="margin:0">${esc(g.name)}</span>${n.recipe === "baby" ? '<span class="free">Free lesson</span>' : ""}</div>
+    <div class="g" style="display:flex;gap:10px;align-items:center"><span class="badge b-${n.ai}">${AI_LABEL[n.ai]}</span><span class="sub" style="margin:0">${esc(g.name)}</span></div>
     <h1>${esc(n.name)}</h1>
     <p class="lead">${esc(n.line)}</p>
     <div class="metrics">
@@ -764,11 +778,36 @@ function bindNiche(n) {
 }
 
 /* ---------- routing ---------- */
+function paywallShellHTML() {
+  const total = CAT.niches.length;
+  return `<div class="paywall-shell">
+    <div class="paywall-blur" aria-hidden="true">
+      <div class="hero"><div class="kicker"><i class="dot"></i>Formatly Pro</div>
+      <h1>Every <em>viral AI format</em>, ready to copy.</h1>
+      <p class="lead">${total} niches · master prompts · Google Flow settings · one payment · ₹${PRICE} · 30 days</p></div>
+    </div>
+    <p class="paywall-hint">Pay below to unlock the full site. Already paid? Sign in from the payment box.</p>
+  </div>`;
+}
+function openPaywall() {
+  if ($("#modal")) return;
+  buyModal(false, { paywall: true });
+}
 function route() {
   if (!CAT) return;
-  const m = location.hash.match(/^#\/n\/([a-z0-9-]+)/);
   const app = $("#app");
   paintChip();
+  if (!paid()) {
+    if (/^#\/n\//.test(location.hash)) { pendingScroll = null; location.replace("#/"); return; }
+    currentNiche = "";
+    app.innerHTML = paywallShellHTML();
+    track("pv");
+    document.title = "Unlock Formatly Pro";
+    openPaywall();
+    return;
+  }
+  closeModal();
+  const m = location.hash.match(/^#\/n\/([a-z0-9-]+)/);
   if (m && nicheById(m[1])) {
     const n = nicheById(m[1]);
     calc.niche = n.id;
@@ -788,7 +827,7 @@ function route() {
 }
 document.addEventListener("click", (e) => {
   const buyBtn = e.target.closest("[data-buy]");
-  if (buyBtn) { e.preventDefault(); if (paid()) { accountModal(); return; } buyModal(); return; }
+  if (buyBtn) { e.preventDefault(); if (paid()) { accountModal(); return; } trackBuyClick(); buyModal(true); return; }
   if (e.target.closest("[data-restore]")) { e.preventDefault(); restoreModal(); return; }
   if (e.target.closest("[data-account]")) { e.preventDefault(); accountModal(); return; }
   const ct = e.target.closest("[data-contact]");
@@ -798,6 +837,7 @@ document.addEventListener("click", (e) => {
   const go = e.target.closest("[data-go]");
   if (go) {
     e.preventDefault();
+    if (!paid()) { openPaywall(); return; }
     const id = go.dataset.go;
     const home = !/^#\/n\//.test(location.hash);
     if (home) { const t = $("#" + id); if (t) t.scrollIntoView(); }
